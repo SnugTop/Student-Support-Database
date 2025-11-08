@@ -4,29 +4,39 @@
 ## Set up
 
 Steps to set up enivroment 
-1. Set up virtural enviroment
-2. Activate enviroment 
-3. Install requirements
+1. Set up/Activate virtural enviroment
+2. Install requirements
 
+
+### Set up/Activate
 
 
 **Set Up Enviroment (macOS)**
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv db-project
+source db-project/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
-cp .env.example .env
 flask run
 ```
 
 **Set Up Virtual Enviroment (Windows: Power Shell)**
 
 ```shell
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
+py -3 -m venv db-project
+.\db-project\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-copy .env.example .env
 flask run
 ```
+
+### Install Requirements
+
+Now that your enviroment is up and running you can install all of your requirements. They live 
+in the `requirements.txt` file. Install all of them by running:
+```shell
+pip install -r requirements.txt
+```
+
+
+
