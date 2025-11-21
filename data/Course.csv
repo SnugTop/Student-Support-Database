@@ -1,0 +1,10 @@
+course_id,course_name,period,teacher,classroom
+1001,Intro Macroeconomics,1,Bob Blevins,101
+1020,Calculus I,2,Abe Adleman,102
+1100,Intro Statistics,5,Abe Adleman,104
+1250,American History,1,Eric Engle,201
+2010,Government,3,Bob Blevins,101
+2220,Physics,2,Fred Fermin,201
+3000,Intermediate Spanish,5,Carly Carrington,201
+3230,Shakespeare,3,Devin D'Angelo,104
+4540,Poetry,4,Devin D'Angelo,102

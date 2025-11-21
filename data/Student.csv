@@ -1,0 +1,26 @@
+student_id,name,dob,country_of_birth,gendar,consent,zip_code
+1000,Abby Amin,3/22/2007,United States,F,TRUE,19311
+1001,Bill Buckner,5/23/2007,United States,M,TRUE,19348
+1002,Carter Coughlin,1/17/2007,United States,M,TRUE,19311
+1003,Daisy Dinesco,12/20/2006,Italy,F,TRUE,19311
+1004,Ernie Emmons,10/26/2006,United States,M,TRUE,19348
+1005,Frank Forte,6/27/2007,United States,M,TRUE,19317
+1006,Gertrude Gersh,3/8/2007,United States,F,TRUE,19311
+1007,Hailey Howard,4/2/2007,United States,F,TRUE,19317
+1008,Ignacio Ibarra,9/30/2006,Mexico,M,TRUE,19348
+1009,Jim Johnson,11/17/2006,United States,M,FALSE,19311
+1010,Kara Kowalksi,10/1/2006,Poland,F,TRUE,19311
+1011,Lilly Lowe,4/2/2007,United States,F,TRUE,19325
+1012,Matt Moore,7/3/2007,United States,M,TRUE,19348
+1013,Ned Napoli,4/14/2007,Canada,M,TRUE,19348
+1014,Oscar Owens,5/25/2007,United States,M,TRUE,19325
+1015,Patricia Pinder,6/16/2007,United States,F,TRUE,19311
+1016,Quentin Queen,11/7/2006,United States,M,TRUE,19317
+1017,Ricardo Rivera,12/8/2006,Mexico,M,TRUE,19348
+1018,Stephanie Suarez,4/9/2007,United States,F,TRUE,19325
+1019,Tiffany Turner,2/18/2007,United States,F,TRUE,19311
+1020,Uria Underwood,10/11/2006,United States,F,TRUE,19348
+1021,Valerie Vargas,4/12/2007,United States,F,TRUE,19317
+1022,Will Waters,7/13/2007,United States,M,TRUE,19311
+1023,Yareli Yates,1/14/2007,Mexico,F,TRUE,19348
+1024,Zane Zimmer,4/15/2007,Germany,M,TRUE,19311

@@ -1,0 +1,16 @@
+coursework_id,course_id,issue_id,student_report,created_at,student_reported_at
+1,1001,1,"talked with teacher to set up regular meeting times after class",9/1/2025,9/5/2025
+2,3230,12,"made up missed quiz",9/9/2025,9/17/2025
+3,1001,22,"turned in incomplete assignments",9/15/2025,10/1/2025
+4,1250,28,"revised my last exam",9/16/2025,9/21/2025
+5,1020,29,"turned in project",9/16/2025,9/28/2025
+6,2220,38,"got new partner for group project",9/30/2025,10/10/2025
+7,1250,48,"hired a tutor",10/8/2025,10/9/2025
+8,2220,56,"worked with teacher 1 on 1 after school",10/15/2025,10/17/2025
+9,4540,60,"revised essay",10/17/2025,11/3/2025
+10,2220,69,"finished incomplete assignments",10/25/2025,11/13/2025
+11,,78,"made a plan to start completing assignments on time",10/30/2025,11/2/2025
+12,3000,82,"asked friend for help studying",11/1/2025,11/8/2025
+13,2010,91,"made up missed exam",11/9/2025,11/17/2025
+14,1001,100,,11/17/2025,
+15,,108,,11/20/2025,

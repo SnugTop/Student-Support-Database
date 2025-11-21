@@ -1,0 +1,22 @@
+referral_id,issue_id,details,student_report,created_at,student_reported_at
+1,7,"student had severe headache","given medicine and fine now",9/4/2025,9/6/2025
+2,19,"student had trouble sleeping and exreme tiredness","doctor discussed stress management to help improve sleep",9/13/2025,9/20/2025
+3,22,"student was depressed","doctor prescribed an anti depressant",9/15/2025,9/21/2025
+4,27,"student was overwhelmed with anxiety","I went over stress management techniques with the doctor",9/16/2025,9/27/2025
+5,30,"student feeling socially isolated, depressed","therapist helped me find coping techniques",9/17/2025,10/14/2025
+6,35,"student had frequent stomach aches","doctor recommended diet changes that I have implemented",9/30/2025,10/2/2025
+7,40,"student was dizzy and had difficulty concentrating","doctor diagnosed me with a concussion, told me to avoid electronics",10/2/2025,10/15/2025
+8,41,"student fought with another student after being bullied","therapist gave anger management techniques for me to practice",10/3/2025,11/1/2025
+9,48,"student had suicidal thoughts","I am on an in depth therapy plan to address stress and anxiety",10/8/2025,11/5/2025
+10,49,"student wants to transfer because of bullying","I talked over schooling options as well as ways to talk through issues with bully",10/10/2025,10/14/2025
+11,54,"student is suddenly restless and unable to focus","prescribed medication by doctor",10/13/2025,10/16/2025
+12,59,"student has no motivation","learned grounding techniques from doctor",10/15/2025,10/28/2025
+13,70,"student not getting along with classmates","I apologized after discussing my behavior",10/26/2025,10/27/2025
+14,75,"student had shortness of breath","I carry an inhaler in gym class now",10/29/2025,11/3/2025
+15,79,"student skipped classes","",11/1/2025,
+16,81,"student refuses to leave counselor's office","",11/1/2025,
+17,83,"student feeling nauseous","took medicine from doctor and went home",11/1/2025,11/1/2025
+18,92,"student feels like they have no friends","",11/9/2025,
+19,94,"student has large rash","given ointment by doctor",11/11/2025,11/12/2025
+20,96,"student feeling dizzy","",11/12/2025,
+21,99,"student is afraid to go home","",11/14/2025,

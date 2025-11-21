@@ -1,0 +1,10 @@
+category_id,name,description
+1,Academics,"Student is struggling with academics or wants advice on how to handle a class"
+2,College/Career,"Student is looking for advice about their future whether related to college or their career"
+3,Course Selection,"Student is deciding which courses to take for future semesters or discussing changing current classes"
+4,Personal Wellbeing,"Student wants to discuss issues with their personal wellbeing"
+5,Social Issues,"Student is having issues socially that they want to discuss"
+6,Family Concerns,"Student is having issues outside of school that they want to discuss"
+7,Behavioral Matters,"Student has had recent behavioral issues that need to be addressed"
+8,Stress/Anxiety,"Student is dealing with stress or anxiety that they need help navigating"
+9,Other,"Any other issue type"

@@ -1,0 +1,14 @@
+financial_id,issue_id,student_report_job,created_at,student_reported_at
+1,4,"went to job fair",9/1/2025,9/29/2025
+2,10,"had a coffee chat",9/9/2025,9/28/2025
+3,13,"went to job fair",9/9/2025,9/30/2025
+4,25,"went to job fair",9/15/2025,9/30/2025
+5,27,"had a coffee chat",9/16/2025,11/5/2025
+6,32,"applied to jobs",9/20/2025,9/27/2025
+7,44,"went to job fair",10/8/2025,11/2/2025
+8,58,"applied to jobs",10/15/2025,10/28/2025
+9,69,"had a coffee chat",10/25/2025,11/9/2025
+10,74,"went to job fair",10/28/2025,11/3/2025
+11,89,,11/6/2025,
+12,99,,11/14/2025,
+13,104,,11/19/2025,

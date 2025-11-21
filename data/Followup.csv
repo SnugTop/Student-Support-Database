@@ -1,0 +1,136 @@
+followup_id,visit_id,counselor_id,date,notes,complete
+1,1,100,09/12/2025,"Student reported academic stress improving after meeting with teacher.",TRUE
+2,2,101,09/14/2025,"Student feels more confident selecting classes for next term.",TRUE
+3,3,102,09/17/2025,"Student reports new schedule adjustments are helping reduce stress.",TRUE
+4,3,108,09/19/2025,"Follow-up confirmed student's course decisions feel clearer now.",TRUE
+5,4,101,09/12/2025,"Student feels more comfortable navigating social concerns.",TRUE
+6,5,100,09/15/2025,"Student still struggling socially; additional follow-up needed.",FALSE
+7,5,110,09/18/2025,"Student reports feeling slightly more connected with peers.",TRUE
+8,6,103,09/11/2025,"General wellbeing check-in showed student is stable.",TRUE
+9,7,104,09/17/2025,"Student reports reduced feelings of loneliness.",TRUE
+10,8,102,09/18/2025,"Student's anxiety around peers appears slightly improved.",TRUE
+11,9,105,09/16/2025,"Family tension easing; student coping better.",TRUE
+12,10,104,09/18/2025,"Behavioral issues decreasing; peer conflict improving.",TRUE
+13,11,106,09/16/2025,"Student feels more prepared for quizzes after makeup work.",TRUE
+14,12,103,09/16/2025,"Family stress moderating; student developing routines.",TRUE
+15,12,101,09/20/2025,"Student still anxious about balancing schoolwork; more follow-up needed.",FALSE
+16,13,107,09/18/2025,"Student managing workload more effectively.",TRUE
+17,14,104,09/17/2025,"General wellbeing improving; student calmer overall.",TRUE
+18,14,102,09/19/2025,"Student reports anxiety down slightly after support.",TRUE
+19,14,107,09/22/2025,"Student still overwhelmed by responsibilities; further follow-up required.",FALSE
+20,15,108,09/22/2025,"Student continues to feel socially disconnected; another check-in needed.",FALSE
+21,16,100,09/22/2025,"Student clarified college pathways and feels reassured.",TRUE
+22,17,109,09/22/2025,"Student confident about course choices.",TRUE
+23,18,106,09/20/2025,"Behavioral coping strategies showing modest improvement.",TRUE
+24,19,102,09/23/2025,"Sleep routine improving; student feels slightly more rested.",TRUE
+25,20,105,09/20/2025,"Self-control strategies effective; behavior improving.",TRUE
+26,21,111,09/26/2025,"Peer relationship concerns easing.",TRUE
+27,22,103,09/25/2025,"Student expressed relief after discussing mixed concerns.",TRUE
+28,23,112,09/26/2025,"College anxiety reduced after follow-up conversation.",TRUE
+29,24,101,09/26/2025,"Student reintegrating socially with classmates.",TRUE
+30,25,110,09/27/2025,"Student managing home stress with moderate success.",TRUE
+31,5,100,09/22/2025,"Student reports gradual improvement socially.",TRUE
+32,26,107,09/24/2025,"Behavioral planning helping student stay on task.",TRUE
+33,27,105,09/25/2025,"Student using anxiety-management tools effectively.",TRUE
+34,27,103,09/26/2025,"Emotional stability improving after referral.",TRUE
+35,28,110,09/28/2025,"General wellbeing steady; student coping well.",TRUE
+36,29,108,10/04/2025,"Student's exam revision increased academic confidence.",TRUE
+37,29,106,10/07/2025,"Student still unsure about workload; more follow-up needed.",FALSE
+38,30,109,10/02/2025,"Student adjusting well to class demands.",TRUE
+39,31,112,10/05/2025,"Student still uncertain about general wellbeing; additional follow-up required.",FALSE
+40,31,105,10/03/2025,"Student feels stable and well-supported.",TRUE
+41,32,105,10/05/2025,"Academic pressure reduced; student meeting expectations.",TRUE
+42,33,112,10/09/2025,"Student reports better organization with assignments.",TRUE
+43,34,100,10/09/2025,"Student confident managing workload now.",TRUE
+44,34,109,10/11/2025,"Student states anxiety is decreasing as routines form.",TRUE
+45,35,106,10/08/2025,"Diet changes helping; stomach pain reduced.",TRUE
+46,36,111,10/09/2025,"Student responding well to tutoring support.",TRUE
+47,36,111,10/14/2025,"Continued improvement in class performance.",TRUE
+48,37,103,10/08/2025,"Behavioral conflict reducing; student calmer.",TRUE
+49,38,107,10/09/2025,"Group project change improved student's comfort.",TRUE
+50,39,102,10/07/2025,"Student coping better with family strain.",TRUE
+51,39,108,10/08/2025,"Recovery from concussion progressing; focus returning.",TRUE
+52,40,104,10/03/2025,"Student healing well from concussion; following doctor's instructions.",TRUE
+53,12,101,09/22/2025,"Student reports reducing stress with better time management.",TRUE
+54,41,109,10/02/2025,"Anger management skills improving.",TRUE
+55,42,111,10/03/2025,"Student learning coping skills for emotional stress.",TRUE
+56,43,101,10/11/2025,"Academic stress easing; student more comfortable.",TRUE
+57,44,100,10/12/2025,"Student still overwhelmed at home; additional follow-up required.",FALSE
+58,45,110,10/17/2025,"Course planning progress steady.",TRUE
+59,45,101,10/18/2025,"Behavioral issues decreasing with support.",TRUE
+60,46,105,10/17/2025,"Family-related stress manageable.",TRUE
+61,47,106,10/15/2025,"Student adjusting after virtual check-in.",TRUE
+62,48,111,10/24/2025,"Student progressing in coursework after concerns.",TRUE
+63,49,103,10/22/2025,"Bullying situation improving; supports in place.",TRUE
+64,49,112,10/24/2025,"Student exploring new schooling options.",TRUE
+65,50,112,10/22/2025,"Student reassured about class selection path.",TRUE
+66,51,107,10/23/2025,"Grounding techniques helping motivation.",TRUE
+67,52,104,10/24/2025,"Essay revisions increasing confidence.",TRUE
+68,52,100,,,
+69,53,109,10/23/2025,"Student less anxious about upcoming assignments.",TRUE
+70,54,111,10/26/2025,"Student navigating friendships more effectively.",TRUE
+71,54,109,10/27/2025,"Emotional stress appears lower.",TRUE
+72,55,102,10/30/2025,"Student still missing assignments; further support required.",FALSE
+73,56,100,10/27/2025,"Family stress moderating; student coping better.",TRUE
+74,14,107,09/25/2025,"Behavioral concerns reduced; student calmer in class.",TRUE
+75,15,108,10/01/2025,"Student still experiencing social isolation; more follow-up needed.",FALSE
+76,57,108,10/19/2025,"Student showing improved academic consistency.",TRUE
+77,58,110,10/28/2025,"Student using irritability-management strategies effectively.",TRUE
+78,58,102,10/29/2025,"Home frustrations reduced slightly with coping tools.",TRUE
+79,59,104,10/29/2025,"Student less anxious about workload.",TRUE
+80,59,112,10/30/2025,"Grounding techniques increasing motivation.",TRUE
+81,59,111,10/31/2025,"Student organizing work more effectively.",TRUE
+82,60,110,10/30/2025,"Peer interactions improving.",TRUE
+83,61,105,10/31/2025,"Family conflict still present but student feels supported.",TRUE
+84,62,106,11/01/2025,"Student feeling more confident socially.",TRUE
+85,63,107,11/02/2025,"Student's general school concerns easing.",TRUE
+86,64,103,11/03/2025,"Family responsibilities more manageable.",TRUE
+87,65,101,11/05/2025,"Student uncertain about electives; follow-up needed.",FALSE
+88,66,111,11/05/2025,"Student balancing work and academics well.",TRUE
+89,67,100,11/05/2025,"General wellbeing stable.",TRUE
+90,68,112,11/06/2025,"Future-planning anxiety reduced.",TRUE
+91,69,109,11/06/2025,"Student apologized to classmates; relationships improving.",TRUE
+92,70,104,11/07/2025,"Peer conflict slowly resolving.",TRUE
+93,71,111,11/08/2025,"Behavior in class stabilizing.",TRUE
+94,71,110,11/09/2025,"Student taking more responsibility for behavior.",TRUE
+95,72,102,11/10/2025,"Student managing test stress more effectively.",TRUE
+96,29,106,10/11/2025,"Student becoming more confident after academic support.",TRUE
+97,73,106,11/08/2025,"Social connection improving.",TRUE
+98,74,107,11/09/2025,"Family and financial issues easing.",TRUE
+99,75,105,11/09/2025,"Breathing improved with inhaler; student feels safer in gym.",TRUE
+100,75,108,,,
+101,76,110,11/11/2025,"Student still struggling with behavior; more follow-up required.",FALSE
+102,77,103,11/10/2025,"College and career stress decreasing.",TRUE
+103,78,111,11/10/2025,"Academic planning more clear.",TRUE
+104,79,100,11/11/2025,"Student still stressed about academics; requires more support.",TRUE
+105,80,112,11/11/2025,"Student calmer after peer-related anxiety discussion.",TRUE
+106,81,104,11/12/2025,"Student remains emotionally distressed; needs continued check-ins.",TRUE
+107,31,112,,,
+108,82,101,11/11/2025,"Student's academic and social pressures decreasing.",TRUE
+109,83,107,11/12/2025,"Nausea resolved; student feeling well again.",TRUE
+110,84,100,11/12/2025,"Student still anxious about general school stress; follow-up recommended.",TRUE
+111,15,108,,,
+112,84,111,11/15/2025,"Student making moderate progress with emotional regulation.",TRUE
+113,85,105,,,
+114,86,109,11/13/2025,"Anxiety improving with coping tools.",TRUE
+115,87,106,11/14/2025,"Student expressing reduced emotional drain.",TRUE
+116,88,108,,,
+117,44,100,10/18/2025,"Student describes small improvements but continued stress.",TRUE
+118,89,102,11/14/2025,"Family tension less severe this week.",TRUE
+119,89,109,,,
+120,90,111,,,
+121,91,104,,,
+122,92,100,11/15/2025,"Academic stress lower after making up exam.",TRUE
+123,92,108,11/17/2025,"Student still has unresolved academic and social concerns; more follow-up required.",FALSE
+124,93,103,11/15/2025,"Student calmer and more organized.",TRUE
+125,94,107,,,
+126,95,101,11/16/2025,"Social confidence improving slowly.",TRUE
+127,55,102,,,
+128,96,110,,,
+129,97,105,,,
+130,65,101,,,
+131,98,110,,,
+132,76,110,,,
+133,99,112,,,
+134,100,106,,,
+135,92,108,11/18/2025,"Student's long-term concerns remain unresolved; continued follow-up needed.",TRUE
