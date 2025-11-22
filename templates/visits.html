@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Visits & Issues - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="top-bar">
+    <div class="logo-circle">SSC</div>
+    <h1>Visits & Issues</h1>
+  </header>
+
+  <main class="content">
+
+    <!-- Overview Card -->
+    <div class="card hero">
+      <h2>Counseling Visits</h2>
+      <p>Track visits and related issue severity.</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
+      </p>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Visit ID</th>
+            <th>Student</th>
+            <th>Date</th>
+            <th>Mode</th>
+            <th># Issues</th>
+            <th>Avg Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in visits %}
+          <tr>
+            <td>{{ v.visit_id }}</td>
+            <td>{{ v.student_name }}</td>
+            <td>{{ v.date }}</td>
+            <td style="text-transform: capitalize;">{{ v.mode }}</td>
+            <td>{{ v.issue_count }}</td>
+            <td>{{ v.avg_severity if v.avg_severity else '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+</div>
+</body>
+</html>

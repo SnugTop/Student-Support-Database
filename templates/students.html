@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Students - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Students</h1>
+    </header>
+
+    <main class="content">
+      <div class="card hero">
+        <h2>Students</h2>
+        <p>List of all students currently in the system.</p>
+        <p style="margin-top: 0.5rem;">
+          <a href="{{ url_for('new_student') }}" class="button-link">+ Add Student</a>
+          <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
+        </p>
+      </div>
+
+      <div class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>DOB</th>
+              <th>Country</th>
+              <th>Gender</th>
+              <th>Consent</th>
+              <th>ZIP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in students %}
+              <tr>
+                <td>{{ s.student_id }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.dob }}</td>
+                <td>{{ s.country_of_birth }}</td>
+                <td>{{ s.gender }}</td>
+                <td>{{ 'Yes' if s.consent else 'No' }}</td>
+                <td>{{ s.zip_code }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

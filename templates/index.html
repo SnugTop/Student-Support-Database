@@ -31,20 +31,36 @@
         {% endif %}
       </section>
 
-      <section class="grid">
-        <div class="card">
-          <h3>Students</h3>
-          <p>Maintain a list of students, their courses, and demographics.</p>
-        </div>
-        <div class="card">
-          <h3>Visits & Issues</h3>
-          <p>Track counseling visits, issues, and severity scores.</p>
-        </div>
-        <div class="card">
-          <h3>Referrals & Follow-ups</h3>
-          <p>Record referrals, follow-ups, and outcomes over time.</p>
-        </div>
+            <section class="grid">
+        <a class="card-link" href="{{ url_for('list_students') }}">
+          <div class="card">
+            <h3>Students</h3>
+            <p>Maintain a list of students, their courses, and demographics.</p>
+          </div>
+        </a>
+
+        <a class="card-link" href="{{ url_for('list_visits') }}">
+          <div class="card">
+            <h3>Visits &amp; Issues</h3>
+            <p>Track counseling visits, issues, and severity scores.</p>
+          </div>
+        </a>
+
+        <a class="card-link" href="{{ url_for('list_referrals') }}">
+          <div class="card">
+            <h3>Referrals &amp; Follow-ups</h3>
+            <p>Record referrals, follow-ups, and outcomes over time.</p>
+          </div>
+        </a>
+
+        <a class="card-link" href="{{ url_for('list_counselors') }}">
+          <div class="card">
+            <h3>Counselors</h3>
+            <p>View counselors, their roles, and experience.</p>
+          </div>
+        </a>
       </section>
+
     </main>
 
     <footer class="footer">

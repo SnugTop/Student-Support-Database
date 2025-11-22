@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Counselors - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Counselors</h1>
+    </header>
+
+    <main class="content">
+      <div class="card hero">
+        <h2>Counselors</h2>
+        <p>View counselor information from the database.</p>
+        <p style="margin-top: 0.5rem;">
+          <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
+        </p>
+      </div>
+
+      <div class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Education</th>
+              <th>Experience (years)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in counselors %}
+              <tr>
+                <td>{{ c.counselor_id }}</td>
+                <td>{{ c.name }}</td>
+                <td>{{ c.paid_volunteer }}</td>
+                <td>{{ c.education }}</td>
+                <td>{{ c.experience }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
