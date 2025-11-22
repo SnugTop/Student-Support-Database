@@ -1,6 +1,8 @@
-CREATE DATABASE `Student-Support-Center`;
+PRAGMA foreign_keys = ON;
 
-USE `Student-Support-Center`;
+--CREATE DATABASE `Student-Support-Center`;
+
+--USE `Student-Support-Center`;
 
 
 -- -----------------------------
@@ -235,7 +237,8 @@ CREATE TABLE Coursework (
 -- ISSUE-TYPE
 -- -----------------------------
 CREATE TABLE Issue_Type (
-    issue_id INT PRIMARY KEY,
+    issue_id INT NOT NULL,
     issue_type VARCHAR(50) NOT NULL,
+    PRIMARY KEY (issue_id, issue_type),
     FOREIGN KEY (issue_id) REFERENCES Issue(issue_id)
 );

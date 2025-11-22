@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Student Support Center</h1>
+    </header>
+
+    <main class="content">
+      <section class="card hero">
+        <h2>Welcome</h2>
+        <p>
+          This dashboard will help track students, counseling visits, issues,
+          referrals, and follow-ups in one place.
+        </p>
+        {% if student_count is not none %}
+          <p class="stat">
+            <span class="stat-number">{{ student_count }}</span>
+            <span class="stat-label">students in the system</span>
+          </p>
+        {% else %}
+          <p class="stat">
+            <span class="stat-label">Database not initialized yet.</span>
+          </p>
+        {% endif %}
+      </section>
+
+            <section class="grid">
+        <a class="card-link" href="{{ url_for('list_students') }}">
+          <div class="card">
+            <h3>Students</h3>
+            <p>Maintain a list of students, their courses, and demographics.</p>
+          </div>
+        </a>
+
+        <a class="card-link" href="{{ url_for('list_visits') }}">
+          <div class="card">
+            <h3>Visits &amp; Issues</h3>
+            <p>Track counseling visits, issues, and severity scores.</p>
+          </div>
+        </a>
+
+        <a class="card-link" href="{{ url_for('list_referrals') }}">
+          <div class="card">
+            <h3>Referrals &amp; Follow-ups</h3>
+            <p>Record referrals, follow-ups, and outcomes over time.</p>
+          </div>
+        </a>
+
+        <a class="card-link" href="{{ url_for('list_counselors') }}">
+          <div class="card">
+            <h3>Counselors</h3>
+            <p>View counselors, their roles, and experience.</p>
+          </div>
+        </a>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <p>&copy; {{ 2025 }} Student Support Center by Chris Murphy and Cameron Daly</p>
+    </footer>
+  </div>
+</body>
+</html>

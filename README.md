@@ -46,3 +46,35 @@ pip install -r requirements.txt
 URL to test Flask App: http://127.0.0.1:5000/ will display. 
 
 
+---
+
+### Database Setup
+We are using sqllite. We will build and populate the database using the `create.sql` and `insert.sql` files.
+
+**Steps to build:**
+
+1. Build
+```shell
+sqlite3 student_support_center.db < create.sql
+```
+2. Populate
+```shell
+ sqlite3 student_support_center.db < insert.sql
+```
+
+3. Shell into database to run queries
+```shell
+sqlite3 student_support_center.db
+```
+
+4. Test queries
+```shell 
+sqlite> SELECT COUNT(*) FROM Student;
+sqlite> SELECT COUNT(*) FROM Issue_Type;
+sqlite> SELECT COUNT(*) FROM Visit_Counselor;
+```
+
+5. Delete Database
+```shell
+rm student_support_center.db
+```

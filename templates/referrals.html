@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Referrals & Follow-ups - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="top-bar">
+    <div class="logo-circle">SSC</div>
+    <h1>Referrals & Follow-ups</h1>
+  </header>
+
+  <main class="content">
+
+    <!-- Navigation -->
+    <div class="card hero">
+      <h2>Healthcare + Support Actions</h2>
+      <p>Track referrals & counselor follow-ups.</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
+      </p>
+    </div>
+
+    <!-- Referrals -->
+    <div class="card">
+      <h3 style="margin-top: 0;">Referrals</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Details</th>
+            <th>Date Sent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in referrals %}
+          <tr>
+            <td>{{ r.referral_id }}</td>
+            <td>{{ r.student_name }}</td>
+            <td>{{ r.details }}</td>
+            <td>{{ r.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Follow-ups -->
+    <div class="card">
+      <h3 style="margin-top: 0;">Follow-ups</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Notes</th>
+            <th>Date</th>
+            <th>Done?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in followups %}
+          <tr>
+            <td>{{ f.followup_id }}</td>
+            <td>{{ f.student_name }}</td>
+            <td>{{ f.notes }}</td>
+            <td>{{ f.date }}</td>
+            <td>
+              {% if f.complete == 1 %}
+                ✔
+              {% else %}
+                ◌
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+</div>
+</body>
+</html>
