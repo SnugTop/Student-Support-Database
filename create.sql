@@ -1,4 +1,5 @@
 CREATE DATABASE `Student-Support-Center`;
+
 USE `Student-Support-Center`;
 
 
