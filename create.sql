@@ -1,6 +1,8 @@
-CREATE DATABASE `Student-Support-Center`;
+PRAGMA foreign_keys = ON;
 
-USE `Student-Support-Center`;
+--CREATE DATABASE `Student-Support-Center`;
+
+--USE `Student-Support-Center`;
 
 
 -- -----------------------------
