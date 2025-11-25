@@ -20,6 +20,15 @@
           <a href="{{ url_for('new_student') }}" class="button-link">+ Add Student</a>
           <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
         </p>
+
+        <form method="get" action="{{ url_for('list_students') }}" class="search-form">
+          <input type="text"
+                 name="search"
+                 placeholder="Search by name..."
+                 value="{{ search }}"
+                 class="search-input">
+          <button type="submit" class="button-link">Search</button>
+        </form>
       </div>
 
       <div class="card">
@@ -33,6 +42,7 @@
               <th>Gender</th>
               <th>Consent</th>
               <th>ZIP</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -45,6 +55,18 @@
                 <td>{{ s.gender }}</td>
                 <td>{{ 'Yes' if s.consent else 'No' }}</td>
                 <td>{{ s.zip_code }}</td>
+                <td>
+                  <a href="{{ url_for('edit_student', student_id=s.student_id) }}"
+                     class="button-link">
+                    Edit
+                  </a>
+                  <form method="post"
+                        action="{{ url_for('delete_student', student_id=s.student_id) }}"
+                        onsubmit="return confirm('Delete this student?');"
+                        style="display:inline;">
+                    <button type="submit" class="button-link secondary">Delete</button>
+                  </form>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
