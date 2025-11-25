@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Visit - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Add New Visit</h1>
+    </header>
+
+    <main class="content">
+      <div class="card">
+        <p style="margin-top: 0;">
+          Need to add or look up a student first?
+          <a href="{{ url_for('list_students') }}" class="button-link secondary">
+            Go to Students
+          </a>
+        </p>
+
+      <form method="post" class="form">
+          <div class="form-row">
+            <label for="student_id">Student ID</label>
+            <input type="number" id="student_id" name="student_id" required>
+          </div>
+
+          <div class="form-row">
+            <label for="date">Visit Date (MM/DD/YYYY)</label>
+            <input type="text" id="date" name="date" placeholder="MM/DD/YYYY" required>
+          </div>
+
+          <div class="form-row">
+            <label for="mode">Mode</label>
+            <select id="mode" name="mode" required>
+              <option value="in-person">In-person</option>
+              <option value="virtual">Virtual</option>
+            </select>
+          </div>
+
+          <hr style="margin: 1.5rem 0;">
+
+          <h3>Issue Details</h3>
+
+          <div class="form-row">
+            <label for="issue_description">Issue Description</label>
+            <textarea id="issue_description" name="issue_description"
+                      placeholder="Describe the student's issue..."
+                      required></textarea>
+          </div>
+
+          <div class="form-row">
+            <label for="severity">Severity (1–10)</label>
+            <input type="number" id="severity" name="severity" min="1" max="10" required>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="button-link">Save Visit</button>
+            <a href="{{ url_for('list_visits') }}" class="button-link secondary">Cancel</a>
+          </div>
+        </form>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

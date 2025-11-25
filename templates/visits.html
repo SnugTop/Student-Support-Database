@@ -21,8 +21,18 @@
       <h2>Counseling Visits</h2>
       <p>Track visits and related issue severity.</p>
       <p style="margin-top: 0.5rem;">
+        <a href="{{ url_for('new_visit') }}" class="button-link">+ Add Visit</a>
         <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
       </p>
+
+      <form method="get" action="{{ url_for('list_visits') }}" class="search-form">
+        <input type="text"
+               name="search"
+               placeholder="Search by student name or visit ID..."
+               value="{{ search }}"
+               class="search-input">
+        <button type="submit" class="button-link">Search</button>
+      </form>
     </div>
 
     <!-- Table -->
@@ -36,17 +46,30 @@
             <th>Mode</th>
             <th># Issues</th>
             <th>Avg Severity</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {% for v in visits %}
           <tr>
-            <td>{{ v.visit_id }}</td>
+            <td>
+              <a href="{{ url_for('visit_detail', visit_id=v.visit_id) }}">
+                {{ v.visit_id }}
+              </a>
+            </td>
             <td>{{ v.student_name }}</td>
             <td>{{ v.date }}</td>
             <td style="text-transform: capitalize;">{{ v.mode }}</td>
             <td>{{ v.issue_count }}</td>
             <td>{{ v.avg_severity if v.avg_severity else '-' }}</td>
+            <td>
+              <form method="post"
+                    action="{{ url_for('delete_visit', visit_id=v.visit_id) }}"
+                    onsubmit="return confirm('Delete this visit?');"
+                    style="display:inline;">
+                <button type="submit" class="button-link secondary">Delete</button>
+              </form>
+            </td>
           </tr>
           {% endfor %}
         </tbody>

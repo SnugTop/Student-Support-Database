@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Visit {{ visit.visit_id }} - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Visit {{ visit.visit_id }}</h1>
+    </header>
+
+    <main class="content">
+      <!-- Visit summary -->
+      <div class="card hero">
+        <h2>Visit Details</h2>
+        <p><strong>Student:</strong> {{ visit.student_name }} (ID: {{ visit.student_id }})</p>
+        <p><strong>Date:</strong> {{ visit.date }}</p>
+        <p><strong>Mode:</strong> {{ visit.mode }}</p>
+
+        <p style="margin-top: 0.75rem;">
+          <a href="{{ url_for('list_visits') }}" class="button-link secondary">
+            ← Back to Visits
+          </a>
+        </p>
+      </div>
+
+      <!-- Issues table -->
+      <div class="card">
+        <h3>Issues Logged for this Visit</h3>
+
+        {% if issues %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Issue ID</th>
+                <th>Description</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for i in issues %}
+                <tr>
+                  <td>{{ i.issue_id }}</td>
+                  <td>{{ i.issue_description }}</td>
+                  <td>{{ i.severity }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>No issues recorded for this visit yet.</p>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</body>
+</html>
