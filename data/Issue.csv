@@ -1,9 +1,9 @@
 issue_id,visit_id,issue_description,severity
-1,1,"Student reported struggling in course 1001 and feeling stressed about academic performance; talked with teacher to set up regular meeting times after class.",7
-2,2,"Student expressed uncertainty about which classes to take next term and requested help with course selection.",4
-3,3,"Student wanted guidance on adjusting current schedule and choosing courses that better match interests.",5
-4,3,"Student felt unsure about fitting in socially and was stressed about future job prospects; discussed attending a job fair to explore opportunities.",6
-5,3,"Student described general discomfort at school and wanted a brief check-in about how things are going overall.",3
+1,1,"Student reported struggling in course 1001 and feeling stressed about academic performance; talked with teacher to set up regular meeting times after class.",TRUE
+2,2,"Student expressed uncertainty about which classes to take next term and requested help with course selection.",FALSE
+3,3,"Student wanted guidance on adjusting current schedule and choosing courses that better match interests.",FALSE
+4,3,"Student felt unsure about fitting in socially and was stressed about future job prospects; discussed attending a job fair to explore opportunities.",FALSE
+5,3,"Student described general discomfort at school and wanted a brief check-in about how things are going overall.",FALSE
 6,4,"Student came in for a general check-in about school and life with no specific concern but wanted someone to talk to.",3
 7,6,"Student had a severe headache and was visibly uncomfortable; referred to health care professional for evaluation and symptom management.",9
 8,8,"Student reported feeling lonely and isolated at school, with some impact on overall wellbeing and mood.",6

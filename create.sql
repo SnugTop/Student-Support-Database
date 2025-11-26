@@ -90,7 +90,7 @@ CREATE TABLE Issue (
     issue_id INT PRIMARY KEY,
     visit_id INT NOT NULL,
     issue_description TEXT NOT NULL,
-    severity INT NOT NULL CHECK (severity BETWEEN 1 AND 10),
+    severity BOOLEAN NOT NULL DEFAULT 0,
     FOREIGN KEY (visit_id) REFERENCES Visit(visit_id)
 );
 
