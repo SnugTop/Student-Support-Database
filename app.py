@@ -32,21 +32,49 @@ def home():
 @app.route("/students")
 def list_students():
     search = request.args.get("search", "")
+    country_filter = request.args.get("country", "")
+    gender_filter = request.args.get("gender", "")
+    zip_filter = request.args.get("zip", "")
 
     conn = get_db_connection()
+
+    # Fetch unique options for dropdowns
+    countries = [row["country_of_birth"] for row in conn.execute("SELECT DISTINCT country_of_birth FROM Student ORDER BY country_of_birth").fetchall()]
+    genders = [row["gender"] for row in conn.execute("SELECT DISTINCT gender FROM Student ORDER BY gender").fetchall()]
+    zips = [row["zip_code"] for row in conn.execute("SELECT DISTINCT zip_code FROM Student ORDER BY zip_code").fetchall()]
+
+    # Build dynamic query
+    query = "SELECT * FROM Student WHERE 1=1"
+    params = []
+
     if search:
-        students = conn.execute(
-            "SELECT * FROM Student WHERE name LIKE ? ORDER BY name",
-            ("%" + search + "%",)
-        ).fetchall()
-    else:
-        students = conn.execute(
-            "SELECT * FROM Student ORDER BY name"
-        ).fetchall()
+        query += " AND name LIKE ?"
+        params.append(f"%{search}%")
+    if country_filter:
+        query += " AND country_of_birth = ?"
+        params.append(country_filter)
+    if gender_filter:
+        query += " AND gender = ?"
+        params.append(gender_filter)
+    if zip_filter:
+        query += " AND zip_code = ?"
+        params.append(zip_filter)
+
+    query += " ORDER BY name"
+    students = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template("students.html", students=students, search=search)
-
+    return render_template(
+        "students.html",
+        students=students,
+        search=search,
+        countries=countries,
+        genders=genders,
+        zips=zips,
+        country_filter=country_filter,
+        gender_filter=gender_filter,
+        zip_filter=zip_filter
+    )
 
 @app.route("/students/new", methods=["GET", "POST"])
 def new_student():

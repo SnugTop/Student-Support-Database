@@ -23,12 +23,35 @@
 
         <form method="get" action="{{ url_for('list_students') }}" class="search-form">
           <input type="text"
-                 name="search"
-                 placeholder="Search by name..."
-                 value="{{ search }}"
-                 class="search-input">
-          <button type="submit" class="button-link">Search</button>
+                name="search"
+                placeholder="Search by name..."
+                value="{{ search }}"
+                class="search-input">
+
+          <select name="country" class="search-select">
+            <option value="">All Countries</option>
+            {% for country in countries %}
+              <option value="{{ country }}" {% if country == country_filter %}selected{% endif %}>{{ country }}</option>
+            {% endfor %}
+          </select>
+
+          <select name="gender" class="search-select">
+            <option value="">All Genders</option>
+            {% for g in genders %}
+              <option value="{{ g }}" {% if g == gender_filter %}selected{% endif %}>{{ g }}</option>
+            {% endfor %}
+          </select>
+
+          <select name="zip" class="search-select">
+            <option value="">All ZIPs</option>
+            {% for z in zips %}
+              <option value="{{ z }}" {% if z == zip_filter %}selected{% endif %}>{{ z }}</option>
+            {% endfor %}
+          </select>
+
+          <button type="submit" class="button-link">Filter</button>
         </form>
+
       </div>
 
       <div class="card">
