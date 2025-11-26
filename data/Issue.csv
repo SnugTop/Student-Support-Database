@@ -1,110 +1,110 @@
 issue_id,visit_id,issue_description,severity
-1,1,"Student reported struggling in course 1001 and feeling stressed about academic performance; talked with teacher to set up regular meeting times after class.",7
-2,2,"Student expressed uncertainty about which classes to take next term and requested help with course selection.",4
-3,3,"Student wanted guidance on adjusting current schedule and choosing courses that better match interests.",5
-4,3,"Student felt unsure about fitting in socially and was stressed about future job prospects; discussed attending a job fair to explore opportunities.",6
-5,3,"Student described general discomfort at school and wanted a brief check-in about how things are going overall.",3
-6,4,"Student came in for a general check-in about school and life with no specific concern but wanted someone to talk to.",3
-7,6,"Student had a severe headache and was visibly uncomfortable; referred to health care professional for evaluation and symptom management.",9
-8,8,"Student reported feeling lonely and isolated at school, with some impact on overall wellbeing and mood.",6
-9,8,"Student felt anxious in social situations and reported stress about interacting with peers in class and at lunch.",7
-10,9,"Student described tension at home and uncertainty about family expectations, and also discussed having a coffee chat related to future job interests.",6
-11,10,"Student had recent behavioral incidents in class, reported conflicts with peers, and felt stressed about how others perceive them.",7
-12,11,"Student missed a quiz in course 3230 and felt anxious about grades; made up missed quiz and discussed balancing coursework more effectively.",5
-13,12,"Student reported family-related stress at home while also exploring job opportunities, including attending a job fair.",6
-14,12,"Student felt overwhelmed and anxious about both family responsibilities and schoolwork, reporting difficulty relaxing.",7
-15,14,"Student requested a general check-in about school and life, sharing mild concerns but no single major issue.",4
-16,15,"Student had a recent behavioral issue in class and wanted to talk about improving reactions and behavior.",6
-17,15,"Student reported conflict with friends and feeling left out in social situations.",6
-18,16,"Student wanted advice about college and future career paths, asking about steps to prepare and explore options.",6
-19,16,"Student had trouble sleeping and extreme tiredness, affecting mood and focus; referred to a health care professional to discuss stress management and sleep routines.",9
-20,17,"Student needed help choosing between several course options and wanted to understand workload differences.",4
-21,18,"Student expressed a general concern that did not fit a specific category but wanted emotional support and guidance.",4
-22,19,"Student was depressed and also reported turning in incomplete assignments; discussed academic stress and was referred to a health care professional for further support.",10
-23,20,"Student had recent behavioral issues, including talking out of turn and not following class rules; wanted strategies for self-control.",7
-24,21,"Student reported tension with friends, feeling excluded from group activities and worried about peer relationships.",6
-25,21,"Student described family stress at home, difficulty managing social relationships, and worry about the future; also mentioned attending a job fair to explore opportunities.",8
-26,22,"Student came in with a miscellaneous concern not fitting a single category and wanted reassurance and brief support.",4
-27,23,"Student was overwhelmed with anxiety about college and career decisions and also attended a coffee chat to explore options; referred to a health care professional to work on stress management.",10
-28,24,"Student struggled with performance in a specific class and revised the last exam after meeting with the teacher to improve understanding.",5
-29,25,"Student worried about grades and long-term plans, turned in a project for course 1020 and discussed how academics tie into college goals.",5
-30,26,"Student was feeling socially isolated and depressed, reporting difficulty connecting with peers; referred to a therapist who helped identify coping techniques.",10
-31,27,"Student brought up a general concern about school that did not fit another category and wanted to briefly talk it through.",4
-32,28,"Student reported family pressures at home and stress about finances, while also applying to jobs to help with future plans.",6
-33,30,"Student sought guidance on course selection and how choices might affect college and career options.",5
-34,30,"Student felt stressed and anxious about managing the new schedule and how it might impact workload and grades.",7
-35,31,"Student reported frequent stomach aches that were affecting wellbeing; referred to a doctor who recommended diet changes, and student discussed how symptoms affected behavior and school attendance.",9
-36,32,"Student wanted information about potential college majors and asked how to start exploring future careers.",5
-37,32,"Student felt anxious about next year’s class schedule and whether it would be too demanding.",7
-38,33,"Student felt stressed about group work dynamics in course 2220 and got a new partner for a group project, aiming to improve both academic performance and social comfort.",6
-39,34,"Student had a behavioral incident in class and wanted to discuss how to handle frustration more appropriately.",6
-40,35,"Student was dizzy and had difficulty concentrating during the school day; referred to a doctor who diagnosed a concussion and advised avoiding electronics and strenuous activity.",10
-41,36,"Student fought with another student after being bullied, reporting strong emotions and difficulty managing anger; referred to a therapist for anger management strategies.",10
-42,38,"Student brought up a minor concern about school that did not clearly match another category and wanted a quick check-in.",4
-43,39,"Student shared concerns about conflict at home and feeling caught in family disagreements.",6
-44,40,"Student reported family concerns and uncertainty about future plans, and also mentioned going to a job fair to explore possible career paths.",6
-45,40,"Student wanted guidance on how current course choices may affect college and career options, asking whether to adjust classes for the future.",5
-46,41,"Student asked for advice about preparing for college and what steps to take during high school to stay on track.",5
-47,41,"Student had a recent behavioral issue at school and wanted help understanding expectations and improving behavior.",6
-48,42,"Student had suicidal thoughts and reported severe academic and emotional stress; also hired a tutor to help with coursework, and was referred to an in-depth therapy plan for stress and anxiety.",10
-49,43,"Student wants to transfer because of bullying, reporting ongoing harassment and feeling unsafe; referred to a health care professional to discuss schooling options and emotional support.",10
-50,44,"Student asked about college and career options and wanted help understanding application timelines and requirements.",5
-51,44,"Student’s recent behavior raised concerns in class; discussed strategies for following rules and managing impulses.",6
-52,44,"Student reported stress from family responsibilities at home and how it affects school focus; wanted to talk through possible supports.",6
-53,45,"Student needed guidance in choosing between several classes and asked about how each would affect workload and interests.",4
-54,47,"Student is suddenly restless and unable to focus in class and at home; referred to a doctor and prescribed medication, with discussion of how symptoms relate to stress and personal wellbeing.",10
-55,48,"Student reported feeling left out by peers and stressed about social situations, including group activities and lunch.",7
-56,49,"Student was struggling in a course and worked with the teacher one-on-one after school to catch up on material and improve confidence.",5
-57,50,"Student wanted help deciding whether to stay in or drop a class and asked about how changes affect future course plans.",5
-58,50,"Student described stress from family responsibilities and behavior at home, while also applying to jobs to support future goals; wanted help balancing these pressures.",7
-59,51,"Student reported having no motivation, difficulty starting tasks, and low energy; referred to a health care professional and learned grounding techniques to help manage these feelings.",9
-60,52,"Student needed help improving writing in course 4540 and revised an essay after feedback, hoping to raise the grade.",5
-61,53,"Student felt anxious about upcoming assignments and tests, describing trouble relaxing even after school.",7
-62,54,"Student reported tension with peers and wanted help navigating friendships and communication.",6
-63,55,"Student brought up a general concern about school life and wanted reassurance and support, without a single clear issue.",4
-64,56,"Student discussed family-related stress and responsibilities at home that make it harder to focus on schoolwork.",6
-65,57,"Student sought help choosing between different elective options and wanted to make sure the schedule stays manageable.",4
-66,58,"Student had behavior concerns related to frustration and irritability and wanted strategies to stay calm in stressful moments at home and school.",7
-67,59,"Student asked about long-term career interests and how to begin exploring job and college options.",5
-68,59,"Student felt stressed and anxious about future college plans and wanted reassurance about being on track.",7
-69,61,"Student struggled with missing and incomplete assignments in course 2220, then finished incomplete work and attended a coffee chat to explore how academics connect to future opportunities.",6
-70,62,"Student was not getting along with classmates and had ongoing peer conflict; discussed strategies to repair relationships and later apologized after reflecting on behavior.",9
-71,63,"Student described a concern that did not fit another category and wanted to briefly talk through feelings about school.",4
-72,64,"Student felt anxious and overwhelmed, especially around tests and deadlines, and wanted coping strategies for stress.",7
-73,65,"Student needed help choosing classes for the next term and asked about balancing difficulty levels and interests.",4
-74,66,"Student reported family stress and financial concerns, and also went to a job fair to learn more about future opportunities.",6
-75,67,"Student experienced shortness of breath in gym and during physical activity, felt worried about health and social impact; referred to a doctor and now carries an inhaler in gym class.",9
-76,69,"Student wanted guidance about future college and career options and asked about building experience over the next few years.",5
-77,70,"Student had questions about which course combination would best fit interests and long-term goals.",4
-78,70,"Student reported falling behind on assignments and made a plan to start completing work on time to improve academic standing.",5
-79,71,"Student skipped classes and reported feeling stressed and anxious about the future and expectations; discussed how worries about college and responsibilities affect attendance.",9
-80,72,"Student described family stress and emotional strain, asked for help managing wellbeing, and also mentioned getting support from a friend for studying.",7
-81,73,"Student refuses to leave the counselor’s office during difficult moments, indicating strong emotional distress; discussed safety, coping skills, and follow-up support.",9
-82,74,"Student struggled with academics in a course and asked a friend for help studying, also reporting stress about keeping up.",6
-83,75,"Student was feeling nauseous during the school day and worried about wellbeing; referred to a doctor and went home after receiving medicine.",9
-84,76,"Student had behavioral concerns, including difficulty following instructions and staying on task, and wanted help with self-control strategies.",6
-85,77,"Student felt anxious and overwhelmed by school demands, describing racing thoughts and trouble calming down.",7
-86,77,"Student asked for guidance on future career interests and how to prepare for college applications.",5
-87,78,"Student needed help understanding how course choices fit graduation requirements and long-term plans.",4
-88,79,"Student reported difficulty deciding on classes and felt uncertain about academic direction, wanting structured planning support.",4
-89,81,"Student brought up family tensions and possible financial stress, expressing concern about how home life impacts school.",7
-90,81,"Student described a non-specific concern about feeling off at school and wanted to talk through general worries.",5
-91,82,"Student made up a missed exam for course 2010 and also discussed academic stress, social pressures, and questions about college, combining academic, social, and future-related concerns.",8
-92,83,"Student feels like they have no friends and is worried about fitting in at school; discussed social skills and ways to build connections.",9
-93,83,"Student had behavioral reactions connected to feeling excluded by peers and wanted strategies for responding more calmly.",7
-94,84,"Student has a large rash and was worried about appearance and comfort; referred to a doctor and given ointment to treat the rash.",9
-95,85,"Student shared ongoing concerns about family conflict and how it affects emotional wellbeing and focus in class.",7
-96,86,"Student reported feeling dizzy at school and worried about underlying health; referred for medical evaluation to ensure safety.",9
-97,87,"Student brought up a serious concern about feeling unsafe at home and being afraid to go home; discussed safety planning and need for further support.",10
-98,89,"Student needed help choosing between class options and wanted to better align schedule with interests and goals.",5
-99,90,"Student is afraid to go home due to family-related concerns and reported feeling unsafe; discussed as a serious wellbeing and family issue and referred for additional support.",10
-100,91,"Student struggled academically after missing an exam in course 1001 and felt stressed about grades; discussed making up work and staying on track.",6
-101,92,"Student reported conflicts with peers, feeling left out of friend groups and worried about social reputation.",5
-102,93,"Student described high stress and anxiety about school performance and wanted tools to manage worry and nervousness.",7
-103,94,"Student raised a general concern that did not clearly match another category and wanted emotional support and guidance.",6
-104,95,"Student discussed family stress and possible financial concerns, along with worries about the future and stability.",7
-105,95,"Student requested advice on course choices in the context of family expectations and academic goals.",6
-106,96,"Student asked about possible careers and college paths, wanting to better understand how current choices affect future options.",5
-107,97,"Student reported feeling emotionally drained and wanting to talk about personal wellbeing, including tiredness and low mood.",6
-108,98,"Student expressed concern about academic performance and asked for a plan to stay organized and communicate more with teachers.",5
-109,99,"Student wanted help understanding future college and career directions and how to begin preparing now.",5
+1,1,"Student reported struggling in course 1001 and feeling stressed about academic performance; talked with teacher to set up regular meeting times after class.",TRUE
+2,2,"Student expressed uncertainty about which classes to take next term and requested help with course selection.",FALSE
+3,3,"Student wanted guidance on adjusting current schedule and choosing courses that better match interests.",FALSE
+4,3,"Student felt unsure about fitting in socially and was stressed about future job prospects; discussed attending a job fair to explore opportunities.",FALSE
+5,3,"Student described general discomfort at school and wanted a brief check-in about how things are going overall.",FALSE
+6,4,"Student came in for a general check-in about school and life with no specific concern but wanted someone to talk to.",FALSE
+7,6,"Student had a severe headache and was visibly uncomfortable; referred to health care professional for evaluation and symptom management.",TRUE
+8,8,"Student reported feeling lonely and isolated at school, with some impact on overall wellbeing and mood.",FALSE
+9,8,"Student felt anxious in social situations and reported stress about interacting with peers in class and at lunch.",TRUE
+10,9,"Student described tension at home and uncertainty about family expectations, and also discussed having a coffee chat related to future job interests.",FALSE
+11,10,"Student had recent behavioral incidents in class, reported conflicts with peers, and felt stressed about how others perceive them.",TRUE
+12,11,"Student missed a quiz in course 3230 and felt anxious about grades; made up missed quiz and discussed balancing coursework more effectively.",FALSE
+13,12,"Student reported family-related stress at home while also exploring job opportunities, including attending a job fair.",FALSE
+14,12,"Student felt overwhelmed and anxious about both family responsibilities and schoolwork, reporting difficulty relaxing.",TRUE
+15,14,"Student requested a general check-in about school and life, sharing mild concerns but no single major issue.",FALSE
+16,15,"Student had a recent behavioral issue in class and wanted to talk about improving reactions and behavior.",FALSE
+17,15,"Student reported conflict with friends and feeling left out in social situations.",FALSE
+18,16,"Student wanted advice about college and future career paths, asking about steps to prepare and explore options.",FALSE
+19,16,"Student had trouble sleeping and extreme tiredness, affecting mood and focus; referred to a health care professional to discuss stress management and sleep routines.",TRUE
+20,17,"Student needed help choosing between several course options and wanted to understand workload differences.",FALSE
+21,18,"Student expressed a general concern that did not fit a specific category but wanted emotional support and guidance.",FALSE
+22,19,"Student was depressed and also reported turning in incomplete assignments; discussed academic stress and was referred to a health care professional for further support.",TRUE
+23,20,"Student had recent behavioral issues, including talking out of turn and not following class rules; wanted strategies for self-control.",TRUE
+24,21,"Student reported tension with friends, feeling excluded from group activities and worried about peer relationships.",FALSE
+25,21,"Student described family stress at home, difficulty managing social relationships, and worry about the future; also mentioned attending a job fair to explore opportunities.",TRUE
+26,22,"Student came in with a miscellaneous concern not fitting a single category and wanted reassurance and brief support.",FALSE
+27,23,"Student was overwhelmed with anxiety about college and career decisions and also attended a coffee chat to explore options; referred to a health care professional to work on stress management.",TRUE
+28,24,"Student struggled with performance in a specific class and revised the last exam after meeting with the teacher to improve understanding.",FALSE
+29,25,"Student worried about grades and long-term plans, turned in a project for course 1020 and discussed how academics tie into college goals.",FALSE
+30,26,"Student was feeling socially isolated and depressed, reporting difficulty connecting with peers; referred to a therapist who helped identify coping techniques.",TRUE
+31,27,"Student brought up a general concern about school that did not fit another category and wanted to briefly talk it through.",FALSE
+32,28,"Student reported family pressures at home and stress about finances, while also applying to jobs to help with future plans.",FALSE
+33,30,"Student sought guidance on course selection and how choices might affect college and career options.",FALSE
+34,30,"Student felt stressed and anxious about managing the new schedule and how it might impact workload and grades.",TRUE
+35,31,"Student reported frequent stomach aches that were affecting wellbeing; referred to a doctor who recommended diet changes, and student discussed how symptoms affected behavior and school attendance.",TRUE
+36,32,"Student wanted information about potential college majors and asked how to start exploring future careers.",FALSE
+37,32,"Student felt anxious about next year’s class schedule and whether it would be too demanding.",TRUE
+38,33,"Student felt stressed about group work dynamics in course 2220 and got a new partner for a group project, aiming to improve both academic performance and social comfort.",FALSE
+39,34,"Student had a behavioral incident in class and wanted to discuss how to handle frustration more appropriately.",FALSE
+40,35,"Student was dizzy and had difficulty concentrating during the school day; referred to a doctor who diagnosed a concussion and advised avoiding electronics and strenuous activity.",TRUE
+41,36,"Student fought with another student after being bullied, reporting strong emotions and difficulty managing anger; referred to a therapist for anger management strategies.",TRUE
+42,38,"Student brought up a minor concern about school that did not clearly match another category and wanted a quick check-in.",FALSE
+43,39,"Student shared concerns about conflict at home and feeling caught in family disagreements.",FALSE
+44,40,"Student reported family concerns and uncertainty about future plans, and also mentioned going to a job fair to explore possible career paths.",FALSE
+45,40,"Student wanted guidance on how current course choices may affect college and career options, asking whether to adjust classes for the future.",FALSE
+46,41,"Student asked for advice about preparing for college and what steps to take during high school to stay on track.",FALSE
+47,41,"Student had a recent behavioral issue at school and wanted help understanding expectations and improving behavior.",FALSE
+48,42,"Student had suicidal thoughts and reported severe academic and emotional stress; also hired a tutor to help with coursework, and was referred to an in-depth therapy plan for stress and anxiety.",TRUE
+49,43,"Student wants to transfer because of bullying, reporting ongoing harassment and feeling unsafe; referred to a health care professional to discuss schooling options and emotional support.",TRUE
+50,44,"Student asked about college and career options and wanted help understanding application timelines and requirements.",FALSE
+51,44,"Student’s recent behavior raised concerns in class; discussed strategies for following rules and managing impulses.",FALSE
+52,44,"Student reported stress from family responsibilities at home and how it affects school focus; wanted to talk through possible supports.",FALSE
+53,45,"Student needed guidance in choosing between several classes and asked about how each would affect workload and interests.",FALSE
+54,47,"Student is suddenly restless and unable to focus in class and at home; referred to a doctor and prescribed medication, with discussion of how symptoms relate to stress and personal wellbeing.",TRUE
+55,48,"Student reported feeling left out by peers and stressed about social situations, including group activities and lunch.",TRUE
+56,49,"Student was struggling in a course and worked with the teacher one-on-one after school to catch up on material and improve confidence.",FALSE
+57,50,"Student wanted help deciding whether to stay in or drop a class and asked about how changes affect future course plans.",FALSE
+58,50,"Student described stress from family responsibilities and behavior at home, while also applying to jobs to support future goals; wanted help balancing these pressures.",TRUE
+59,51,"Student reported having no motivation, difficulty starting tasks, and low energy; referred to a health care professional and learned grounding techniques to help manage these feelings.",TRUE
+60,52,"Student needed help improving writing in course 4540 and revised an essay after feedback, hoping to raise the grade.",FALSE
+61,53,"Student felt anxious about upcoming assignments and tests, describing trouble relaxing even after school.",TRUE
+62,54,"Student reported tension with peers and wanted help navigating friendships and communication.",FALSE
+63,55,"Student brought up a general concern about school life and wanted reassurance and support, without a single clear issue.",FALSE
+64,56,"Student discussed family-related stress and responsibilities at home that make it harder to focus on schoolwork.",FALSE
+65,57,"Student sought help choosing between different elective options and wanted to make sure the schedule stays manageable.",FALSE
+66,58,"Student had behavior concerns related to frustration and irritability and wanted strategies to stay calm in stressful moments at home and school.",TRUE
+67,59,"Student asked about long-term career interests and how to begin exploring job and college options.",FALSE
+68,59,"Student felt stressed and anxious about future college plans and wanted reassurance about being on track.",TRUE
+69,61,"Student struggled with missing and incomplete assignments in course 2220, then finished incomplete work and attended a coffee chat to explore how academics connect to future opportunities.",FALSE
+70,62,"Student was not getting along with classmates and had ongoing peer conflict; discussed strategies to repair relationships and later apologized after reflecting on behavior.",TRUE
+71,63,"Student described a concern that did not fit another category and wanted to briefly talk through feelings about school.",FALSE
+72,64,"Student felt anxious and overwhelmed, especially around tests and deadlines, and wanted coping strategies for stress.",TRUE
+73,65,"Student needed help choosing classes for the next term and asked about balancing difficulty levels and interests.",FALSE
+74,66,"Student reported family stress and financial concerns, and also went to a job fair to learn more about future opportunities.",FALSE
+75,67,"Student experienced shortness of breath in gym and during physical activity, felt worried about health and social impact; referred to a doctor and now carries an inhaler in gym class.",TRUE
+76,69,"Student wanted guidance about future college and career options and asked about building experience over the next few years.",FALSE
+77,70,"Student had questions about which course combination would best fit interests and long-term goals.",FALSE
+78,70,"Student reported falling behind on assignments and made a plan to start completing work on time to improve academic standing.",FALSE
+79,71,"Student skipped classes and reported feeling stressed and anxious about the future and expectations; discussed how worries about college and responsibilities affect attendance.",TRUE
+80,72,"Student described family stress and emotional strain, asked for help managing wellbeing, and also mentioned getting support from a friend for studying.",TRUE
+81,73,"Student refuses to leave the counselor’s office during difficult moments, indicating strong emotional distress; discussed safety, coping skills, and follow-up support.",TRUE
+82,74,"Student struggled with academics in a course and asked a friend for help studying, also reporting stress about keeping up.",FALSE
+83,75,"Student was feeling nauseous during the school day and worried about wellbeing; referred to a doctor and went home after receiving medicine.",TRUE
+84,76,"Student had behavioral concerns, including difficulty following instructions and staying on task, and wanted help with self-control strategies.",FALSE
+85,77,"Student felt anxious and overwhelmed by school demands, describing racing thoughts and trouble calming down.",TRUE
+86,77,"Student asked for guidance on future career interests and how to prepare for college applications.",FALSE
+87,78,"Student needed help understanding how course choices fit graduation requirements and long-term plans.",FALSE
+88,79,"Student reported difficulty deciding on classes and felt uncertain about academic direction, wanting structured planning support.",FALSE
+89,81,"Student brought up family tensions and possible financial stress, expressing concern about how home life impacts school.",TRUE
+90,81,"Student described a non-specific concern about feeling off at school and wanted to talk through general worries.",FALSE
+91,82,"Student made up a missed exam for course 2010 and also discussed academic stress, social pressures, and questions about college, combining academic, social, and future-related concerns.",TRUE
+92,83,"Student feels like they have no friends and is worried about fitting in at school; discussed social skills and ways to build connections.",TRUE
+93,83,"Student had behavioral reactions connected to feeling excluded by peers and wanted strategies for responding more calmly.",TRUE
+94,84,"Student has a large rash and was worried about appearance and comfort; referred to a doctor and given ointment to treat the rash.",TRUE
+95,85,"Student shared ongoing concerns about family conflict and how it affects emotional wellbeing and focus in class.",TRUE
+96,86,"Student reported feeling dizzy at school and worried about underlying health; referred for medical evaluation to ensure safety.",TRUE
+97,87,"Student brought up a serious concern about feeling unsafe at home and being afraid to go home; discussed safety planning and need for further support.",TRUE
+98,89,"Student needed help choosing between class options and wanted to better align schedule with interests and goals.",FALSE
+99,90,"Student is afraid to go home due to family-related concerns and reported feeling unsafe; discussed as a serious wellbeing and family issue and referred for additional support.",TRUE
+100,91,"Student struggled academically after missing an exam in course 1001 and felt stressed about grades; discussed making up work and staying on track.",FALSE
+101,92,"Student reported conflicts with peers, feeling left out of friend groups and worried about social reputation.",FALSE
+102,93,"Student described high stress and anxiety about school performance and wanted tools to manage worry and nervousness.",TRUE
+103,94,"Student raised a general concern that did not clearly match another category and wanted emotional support and guidance.",FALSE
+104,95,"Student discussed family stress and possible financial concerns, along with worries about the future and stability.",TRUE
+105,95,"Student requested advice on course choices in the context of family expectations and academic goals.",FALSE
+106,96,"Student asked about possible careers and college paths, wanting to better understand how current choices affect future options.",FALSE
+107,97,"Student reported feeling emotionally drained and wanting to talk about personal wellbeing, including tiredness and low mood.",FALSE
+108,98,"Student expressed concern about academic performance and asked for a plan to stay organized and communicate more with teachers.",FALSE
+109,99,"Student wanted help understanding future college and career directions and how to begin preparing now.",FALSE

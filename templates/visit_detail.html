@@ -45,7 +45,13 @@
                 <tr>
                   <td>{{ i.issue_id }}</td>
                   <td>{{ i.issue_description }}</td>
-                  <td>{{ i.severity }}</td>
+                  <td>
+                    {% if i.severity %}
+                      <span class="badge critical">Critical</span>
+                    {% else %}
+                      <span class="badge ok">Not Critical</span>
+                    {% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>

@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 DATABASE = "student_support_center.db"
 
-
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row  # access columns by name
@@ -25,7 +24,6 @@ def home():
         conn.close()
 
     return render_template("index.html", student_count=student_count)
-
 
 # ---------- STUDENTS ----------
 
@@ -87,7 +85,9 @@ def new_student():
         zip_code = request.form["zip_code"]
 
         conn = get_db_connection()
-        row = conn.execute("SELECT COALESCE(MAX(student_id), 0) + 1 AS next_id FROM Student").fetchone()
+        row = conn.execute(
+            "SELECT COALESCE(MAX(student_id), 0) + 1 AS next_id FROM Student"
+        ).fetchone()
         next_id = row["next_id"]
 
         conn.execute(
@@ -111,7 +111,6 @@ def delete_student(student_id):
     conn.commit()
     conn.close()
     return redirect(url_for("list_students"))
-
 
 
 @app.route("/students/<int:student_id>/edit", methods=["GET", "POST"])
@@ -143,7 +142,6 @@ def edit_student(student_id):
     conn.close()
     return render_template("student_form.html", student=student)
 
-
 # ---------- COUNSELORS ----------
 
 @app.route("/counselors")
@@ -154,8 +152,6 @@ def list_counselors():
     ).fetchall()
     conn.close()
     return render_template("counselors.html", counselors=counselors)
-
-
 
 # ---------- VISITS & ISSUES ----------
 
@@ -173,7 +169,7 @@ def list_visits():
               v.mode,
               s.name AS student_name,
               COUNT(i.issue_id) AS issue_count,
-              COALESCE(ROUND(AVG(i.severity), 1), NULL) AS avg_severity
+              COALESCE(MAX(i.severity), 0) AS has_critical_issue
             FROM Visit v
             JOIN Student s ON s.student_id = v.student_id
             LEFT JOIN Issue i ON i.visit_id = v.visit_id
@@ -193,7 +189,7 @@ def list_visits():
               v.mode,
               s.name AS student_name,
               COUNT(i.issue_id) AS issue_count,
-              COALESCE(ROUND(AVG(i.severity), 1), NULL) AS avg_severity
+              COALESCE(MAX(i.severity), 0) AS has_critical_issue
             FROM Visit v
             JOIN Student s ON s.student_id = v.student_id
             LEFT JOIN Issue i ON i.visit_id = v.visit_id
@@ -213,7 +209,8 @@ def new_visit():
         date = request.form["date"]
         mode = request.form["mode"]
         issue_description = request.form["issue_description"]
-        severity = int(request.form["severity"])
+
+        severity_flag = 1 if request.form.get("severity") == "1" else 0
 
         conn = get_db_connection()
 
@@ -235,7 +232,7 @@ def new_visit():
         conn.execute("""
             INSERT INTO Issue (issue_id, visit_id, issue_description, severity)
             VALUES (?, ?, ?, ?)
-        """, (next_issue_id, next_visit_id, issue_description, severity))
+        """, (next_issue_id, next_visit_id, issue_description, severity_flag))
 
         conn.commit()
         conn.close()
@@ -293,9 +290,7 @@ def visit_detail(visit_id):
     conn.close()
     return render_template("visit_detail.html", visit=visit, issues=issues)
 
-
 # ---------- REFERRALS & FOLLOWUPS ----------
-
 @app.route("/referrals")
 def list_referrals():
     conn = get_db_connection()
@@ -337,7 +332,6 @@ def list_referrals():
         referrals=referrals,
         followups=followups,
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True)
