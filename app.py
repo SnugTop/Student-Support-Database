@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 DATABASE = "student_support_center.db"
 
-
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row  # access columns by name
@@ -25,7 +24,6 @@ def home():
         conn.close()
 
     return render_template("index.html", student_count=student_count)
-
 
 # ---------- STUDENTS ----------
 
@@ -144,7 +142,6 @@ def edit_student(student_id):
     conn.close()
     return render_template("student_form.html", student=student)
 
-
 # ---------- COUNSELORS ----------
 
 @app.route("/counselors")
@@ -155,7 +152,6 @@ def list_counselors():
     ).fetchall()
     conn.close()
     return render_template("counselors.html", counselors=counselors)
-
 
 # ---------- VISITS & ISSUES ----------
 
@@ -294,9 +290,7 @@ def visit_detail(visit_id):
     conn.close()
     return render_template("visit_detail.html", visit=visit, issues=issues)
 
-
 # ---------- REFERRALS & FOLLOWUPS ----------
-
 @app.route("/referrals")
 def list_referrals():
     conn = get_db_connection()
@@ -338,7 +332,6 @@ def list_referrals():
         referrals=referrals,
         followups=followups,
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True)
