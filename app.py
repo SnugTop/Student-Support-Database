@@ -214,7 +214,6 @@ def new_visit():
         mode = request.form["mode"]
         issue_description = request.form["issue_description"]
 
-        # severity is now a BOOLEAN flag: "1" or "0" from the form
         severity_flag = 1 if request.form.get("severity") == "1" else 0
 
         conn = get_db_connection()

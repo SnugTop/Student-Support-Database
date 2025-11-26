@@ -19,7 +19,7 @@
     <!-- Overview Card -->
     <div class="card hero">
       <h2>Counseling Visits</h2>
-      <p>Track visits and related issue severity.</p>
+      <p>Track visits, issues, and whether any issues are critical.</p>
       <p style="margin-top: 0.5rem;">
         <a href="{{ url_for('new_visit') }}" class="button-link">+ Add Visit</a>
         <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
@@ -45,7 +45,7 @@
             <th>Date</th>
             <th>Mode</th>
             <th># Issues</th>
-            <th>Avg Severity</th>
+            <th>Critical?</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -61,7 +61,13 @@
             <td>{{ v.date }}</td>
             <td style="text-transform: capitalize;">{{ v.mode }}</td>
             <td>{{ v.issue_count }}</td>
-            <td>{{ v.avg_severity if v.avg_severity else '-' }}</td>
+            <td>
+              {% if v.has_critical_issue %}
+                <span class="badge critical">Critical</span>
+              {% else %}
+                <span class="badge ok">OK</span>
+              {% endif %}
+            </td>
             <td>
               <form method="post"
                     action="{{ url_for('delete_visit', visit_id=v.visit_id) }}"
