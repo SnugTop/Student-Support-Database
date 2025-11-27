@@ -78,3 +78,12 @@ sqlite> SELECT COUNT(*) FROM Visit_Counselor;
 ```shell
 rm student_support_center.db
 ```
+---
+## Test Queries 
+All the queries can be found in the `queries.sql` file. 
+- 1 - 17 will directly respond to the requirements of the project. 
+- 18 - 20 are for security purposes. 
+
+
+Example of a failed SQL injection query:
+![img.png](img.png)

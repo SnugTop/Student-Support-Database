@@ -244,11 +244,21 @@ GROUP BY c.course_id, c.course_name
 ORDER BY num_students_with_difficulty DESC, c.course_name;
 
 -- -----------------------------
--- Question 18:
--- Counselors on payroll vs volunteers
+-- Question 18 Security:
+-- SQL Injection for Add Student
 -- -----------------------------
+-- Add student and enter name:
+Robert'); DROP TABLE Student;--
 
 -- -----------------------------
--- Question 19:
--- Counselors on payroll vs volunteers
--- ----------------------------8
+-- Question 19 Security:
+-- Drop Table on SQL Console
+-- ----------------------------
+DROP TABLE Student;
+
+-- -----------------------------
+-- Question 20 Security:
+-- SQL injection test on search fields
+-- ----------------------------
+-- in search field enter:
+' OR 1=1--
