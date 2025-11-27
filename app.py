@@ -320,6 +320,13 @@ def sql_console():
                     if conn:
                         conn.close()
 
+    return render_template(
+        "sql_console.html",
+        query=query,
+        headers=headers,
+        rows=rows,
+        error=error,
+    )
 
 # ---------- REFERRALS & FOLLOWUPS ----------
 @app.route("/referrals")
