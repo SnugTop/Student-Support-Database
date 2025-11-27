@@ -104,6 +104,154 @@ def new_student():
     return render_template("student_form.html")
 
 
+@app.route("/students/<int:student_id>", methods=["GET", "POST"])
+def view_student(student_id):
+    conn = get_db_connection()
+
+    # ---------- BASIC INFO ----------
+    student = conn.execute(
+        "SELECT * FROM Student WHERE student_id = ?", (student_id,)
+    ).fetchone()
+
+    # Update basic info
+    if request.method == "POST" and request.form.get("form_type") == "basic_info":
+        name = request.form["name"]
+        dob = request.form["dob"]
+        country_of_birth = request.form["country_of_birth"]
+        gender = request.form["gender"]
+        consent = 1 if request.form.get("consent") == "on" else 0
+        zip_code = request.form["zip_code"]
+
+        conn.execute("""
+            UPDATE Student
+            SET name=?, dob=?, country_of_birth=?, gender=?, consent=?, zip_code=?
+            WHERE student_id=?
+        """, (name, dob, country_of_birth, gender, consent, zip_code, student_id))
+        conn.commit()
+        return redirect(url_for("view_student", student_id=student_id))
+
+    # ---------- VISITS ----------
+    visits = conn.execute("""
+        SELECT * FROM Visit
+        WHERE student_id = ?
+        ORDER BY date DESC
+    """, (student_id,)).fetchall()
+
+    visit_data = []
+    for visit in visits:
+        # Get issues for each visit
+        issues = conn.execute("""
+            SELECT i.issue_id, i.issue_description, i.severity
+            FROM Issue i
+            WHERE i.visit_id = ?
+        """, (visit["visit_id"],)).fetchall()
+
+        issue_list = []
+        for issue in issues:
+            # Issue-Type
+            types = conn.execute("""
+                SELECT issue_type FROM Issue_Type
+                WHERE issue_id = ?
+            """, (issue["issue_id"],)).fetchall()
+            type_list = [t["issue_type"] for t in types]
+
+            # Issue-Category -> Category name
+            categories = conn.execute("""
+                SELECT c.name
+                FROM Issue_Category ic
+                JOIN Category c ON ic.category_id = c.category_id
+                WHERE ic.issue_id = ?
+            """, (issue["issue_id"],)).fetchall()
+            category_list = [c["name"] for c in categories]
+
+            # Suggestions for this visit
+            suggestions = conn.execute("""
+                SELECT s.details, c.name AS counselor_name
+                FROM Suggestion s
+                JOIN Counselor c ON s.counselor_id = c.counselor_id
+                WHERE s.visit_id = ?
+            """, (visit["visit_id"],)).fetchall()
+
+            issue_list.append({
+                "issue": issue,
+                "types": type_list,
+                "categories": category_list,
+                "suggestions": suggestions
+            })
+
+        visit_data.append({
+            "visit": visit,
+            "issues": issue_list
+        })
+
+    # ---------- DIAGNOSIS ----------
+    edit_diag_id = request.args.get("edit_diag_id", type=int)  # which diag is editable
+
+    diagnoses = conn.execute("""
+        SELECT d.diagnosis_id, d.diagnosis_date, d.provider_id, d.diagnosis_code,
+            dl.diagnosis AS diagnosis_name,
+            p.name AS provider_name
+        FROM Diagnosis d
+        JOIN Diagnosis_List dl ON d.diagnosis_code = dl.diagnosis_code
+        JOIN Provider p ON d.provider_id = p.provider_id
+        WHERE d.student_id = ?
+    """, (student_id,)).fetchall()
+
+    diagnosis_data = []
+    for diag in diagnoses:
+        symptoms = conn.execute("""
+            SELECT sl.symptom
+            FROM Symptom s
+            JOIN Symptom_List sl ON s.symptom_code = sl.symptom_code
+            WHERE s.diagnosis_id = ?
+        """, (diag["diagnosis_id"],)).fetchall()
+        symptom_list = [s["symptom"] for s in symptoms]
+
+        diagnosis_data.append({
+            "diagnosis_id": diag["diagnosis_id"],
+            "diagnosis_date": diag["diagnosis_date"],
+            "provider_id": diag["provider_id"],
+            "provider_name": diag["provider_name"],
+            "diagnosis_code": diag["diagnosis_code"],
+            "diagnosis_name": diag["diagnosis_name"],
+            "symptoms": symptom_list,
+            "editable": diag["diagnosis_id"] == edit_diag_id
+        })
+
+    # ---------- DIAGNOSIS DROPDOWN DATA ----------
+    providers = conn.execute("SELECT provider_id, name FROM Provider").fetchall()
+    diag_list = conn.execute("SELECT diagnosis_code, diagnosis FROM Diagnosis_List").fetchall()
+    symptoms_all = conn.execute("SELECT symptom_code, symptom FROM Symptom_List").fetchall()
+
+
+    # ---------- COURSES ----------
+    courses = conn.execute("""
+        SELECT c.*
+        FROM Student_Course sc
+        JOIN Course c ON sc.course_id = c.course_id
+        WHERE sc.student_id = ?
+    """, (student_id,)).fetchall()
+
+    # For adding new course
+    all_courses = conn.execute("SELECT course_id, course_name FROM Course").fetchall()
+
+    conn.close()
+
+    return render_template(
+        "student_view.html",
+        student=student,
+        visits=visit_data,
+        diagnoses=diagnosis_data,
+        courses=courses,
+        providers=providers,
+        diag_list=diag_list,
+        symptoms_all=symptoms_all,
+        all_courses=all_courses
+    )
+
+
+
+
 @app.route("/students/<int:student_id>/delete", methods=["POST"])
 def delete_student(student_id):
     conn = get_db_connection()
@@ -332,6 +480,102 @@ def list_referrals():
         referrals=referrals,
         followups=followups,
     )
+
+# ------------------ DIAGNOSIS ROUTES ------------------
+
+@app.route("/diagnosis/<int:diagnosis_id>/edit", methods=["POST"])
+def edit_diagnosis(diagnosis_id):
+    conn = get_db_connection()
+    diagnosis_date = request.form["diagnosis_date"]
+    provider_id = request.form["provider_id"]
+    diagnosis_code = request.form["diagnosis_code"]
+    symptoms = request.form.getlist("symptoms")  # list of symptom_code
+
+    # Update the diagnosis record
+    conn.execute("""
+        UPDATE Diagnosis
+        SET diagnosis_date=?, provider_id=?, diagnosis_code=?
+        WHERE diagnosis_id=?
+    """, (diagnosis_date, provider_id, diagnosis_code, diagnosis_id))
+
+    # Remove old symptoms
+    conn.execute("DELETE FROM Symptom WHERE diagnosis_id=?", (diagnosis_id,))
+    # Insert new symptoms
+    for s in symptoms:
+        conn.execute("INSERT INTO Symptom (diagnosis_id, symptom_code) VALUES (?, ?)",
+                     (diagnosis_id, s))
+
+    conn.commit()
+
+    # Get the student_id to redirect back to their page
+    student_id = conn.execute("SELECT student_id FROM Diagnosis WHERE diagnosis_id=?",
+                              (diagnosis_id,)).fetchone()["student_id"]
+    conn.close()
+    return redirect(url_for("view_student", student_id=student_id))
+
+
+@app.route("/diagnosis/<int:diagnosis_id>/delete", methods=["GET", "POST"])
+def delete_diagnosis(diagnosis_id):
+    conn = get_db_connection()
+    # Get student_id before deleting
+    student_id = conn.execute("SELECT student_id FROM Diagnosis WHERE diagnosis_id=?",
+                              (diagnosis_id,)).fetchone()["student_id"]
+
+    conn.execute("DELETE FROM Diagnosis WHERE diagnosis_id=?", (diagnosis_id,))
+    # Also remove associated symptoms
+    conn.execute("DELETE FROM Symptom WHERE diagnosis_id=?", (diagnosis_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view_student", student_id=student_id))
+
+
+@app.route("/students/<int:student_id>/diagnosis/add", methods=["POST"])
+def add_diagnosis(student_id):
+    conn = get_db_connection()
+    diagnosis_date = request.form["diagnosis_date"]
+    provider_id = request.form["provider_id"]
+    diagnosis_code = request.form["diagnosis_code"]
+    symptoms = request.form.getlist("symptoms")
+
+    # Generate a new diagnosis_id
+    row = conn.execute("SELECT COALESCE(MAX(diagnosis_id), 0) + 1 AS next_id FROM Diagnosis").fetchone()
+    new_id = row["next_id"]
+
+    # Insert new diagnosis
+    conn.execute("""
+        INSERT INTO Diagnosis (diagnosis_id, student_id, provider_id, diagnosis_code, diagnosis_date)
+        VALUES (?, ?, ?, ?, ?)
+    """, (new_id, student_id, provider_id, diagnosis_code, diagnosis_date))
+
+    # Insert symptoms
+    for s in symptoms:
+        conn.execute("INSERT INTO Symptom (diagnosis_id, symptom_code) VALUES (?, ?)", (new_id, s))
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view_student", student_id=student_id))
+
+
+# ------------------ COURSE ROUTES ------------------
+
+@app.route("/students/<int:student_id>/course/add", methods=["POST"])
+def add_course(student_id):
+    course_id = request.form["course_id"]
+    conn = get_db_connection()
+    conn.execute("INSERT INTO Student_Course (student_id, course_id) VALUES (?, ?)", (student_id, course_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view_student", student_id=student_id))
+
+
+@app.route("/students/<int:student_id>/course/<int:course_id>/remove", methods=["GET", "POST"])
+def remove_course(student_id, course_id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM Student_Course WHERE student_id=? AND course_id=?", (student_id, course_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view_student", student_id=student_id))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

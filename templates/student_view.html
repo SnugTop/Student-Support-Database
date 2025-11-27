@@ -1,0 +1,122 @@
+<h1>Student {{ student.student_id }} - {{ student.name }}</h1>
+
+<h2>Basic Info</h2>
+<form method="post">
+    <input type="hidden" name="form_type" value="basic_info">
+    Name: <input type="text" name="name" value="{{ student.name }}"><br>
+    DOB: <input type="text" name="dob" value="{{ student.dob }}"><br> <!-- typed input -->
+    Country: <input type="text" name="country_of_birth" value="{{ student.country_of_birth }}"><br>
+    Gender:
+    <select name="gender">
+        <option value="M" {% if student.gender == 'M' %}selected{% endif %}>M</option>
+        <option value="F" {% if student.gender == 'F' %}selected{% endif %}>F</option>
+    </select><br>
+    Consent: <input type="checkbox" name="consent" {% if student.consent %}checked{% endif %}><br>
+    ZIP: <input type="text" name="zip_code" value="{{ student.zip_code }}"><br>
+    <button type="submit">Update</button>
+</form>
+
+
+<h2>Visits</h2>
+{% for vd in visits %}
+    <h3>{{ vd.visit.date }} - {{ vd.visit.mode }}</h3>
+    {% for issue_entry in vd.issues %}
+        <p>
+            <strong>{{ issue_entry.issue.issue_description }}</strong><br>
+            Critical: <input type="checkbox" {% if issue_entry.issue.severity %}checked{% endif %} disabled><br>
+            Types: {{ issue_entry.types|join(', ') }}<br>
+            Categories: {{ issue_entry.categories|join(', ') }}<br>
+            Suggestions:
+            <ul>
+            {% for s in issue_entry.suggestions %}
+                <li>{{ s.details }} - {{ s.counselor_name }}</li>
+            {% endfor %}
+            </ul>
+        </p>
+    {% endfor %}
+{% endfor %}
+
+<h2>Diagnoses</h2>
+{% for diag in diagnoses %}
+    {% if diag.editable %}
+        <!-- Editable form -->
+        <form method="post" action="{{ url_for('edit_diagnosis', diagnosis_id=diag.diagnosis_id) }}">
+            Date: <input type="text" name="diagnosis_date" value="{{ diag.diagnosis_date }}"><br>
+            Provider:
+            <select name="provider_id">
+                {% for p in providers %}
+                    <option value="{{ p.provider_id }}" {% if p.provider_id == diag.provider_id %}selected{% endif %}>{{ p.name }}</option>
+                {% endfor %}
+            </select><br>
+            Diagnosis:
+            <select name="diagnosis_code">
+                {% for d in diag_list %}
+                    <option value="{{ d.diagnosis_code }}" {% if d.diagnosis_code == diag.diagnosis_code %}selected{% endif %}>{{ d.diagnosis }}</option>
+                {% endfor %}
+            </select><br>
+            Symptoms:
+            <select name="symptoms" multiple>
+                {% for s in symptoms_all %}
+                    <option value="{{ s.symptom_code }}" {% if s.symptom in diag.symptoms %}selected{% endif %}>{{ s.symptom }}</option>
+                {% endfor %}
+            </select><br>
+            <button type="submit">Save</button>
+            <a href="{{ url_for('view_student', student_id=student.student_id) }}">Cancel</a>
+        </form>
+    {% else %}
+        <!-- Read-only display -->
+        <div>
+            <strong>Date:</strong> {{ diag.diagnosis_date }}<br>
+            <strong>Provider:</strong> {{ diag.provider_name }}<br>
+            <strong>Diagnosis:</strong> {{ diag.diagnosis_name }}<br>
+            <strong>Symptoms:</strong> {% if diag.symptoms %}{{ diag.symptoms | join(', ') }}{% else %}None{% endif %}<br>
+            <a href="{{ url_for('view_student', student_id=student.student_id, edit_diag_id=diag.diagnosis_id) }}">Edit</a>
+        </div>
+    {% endif %}
+{% endfor %}
+
+<h3>Add New Diagnosis</h3>
+<form method="post" action="{{ url_for('add_diagnosis', student_id=student.student_id) }}">
+    Date: <input type="text" name="diagnosis_date"><br>
+    Provider:
+    <select name="provider_id">
+        {% for p in providers %}
+            <option value="{{ p.provider_id }}">{{ p.name }}</option>
+        {% endfor %}
+    </select><br>
+    Diagnosis:
+    <select name="diagnosis_code">
+        {% for d in diag_list %}
+            <option value="{{ d.diagnosis_code }}">{{ d.diagnosis }}</option>
+        {% endfor %}
+    </select><br>
+    Symptoms:
+    <select name="symptoms" multiple>
+        {% for s in symptoms_all %}
+            <option value="{{ s.symptom_code }}">{{ s.symptom }}</option>
+        {% endfor %}
+    </select><br>
+    <button type="submit">Add</button>
+</form>
+
+<h2>Courses</h2>
+<ul>
+{% for c in courses %}
+    <li>
+        {{ c.course_name }} - {{ c.teacher }} - {{ c.classroom }} - {{ c.period }}
+        <a href="{{ url_for('remove_course', student_id=student.student_id, course_id=c.course_id) }}">Remove</a>
+    </li>
+{% endfor %}
+</ul>
+
+
+<h3>Add Course</h3>
+<form method="post" action="{{ url_for('add_course', student_id=student.student_id) }}">
+    Course ID:
+    <select name="course_id">
+        {% for c in all_courses %}
+            <option value="{{ c.course_id }}">{{ c.course_name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Add</button>
+</form>

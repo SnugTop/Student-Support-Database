@@ -138,11 +138,11 @@ CREATE TABLE Diagnosis_List (
 -- -----------------------------
 CREATE TABLE Diagnosis (
     diagnosis_id INT PRIMARY KEY,
-    issue_id INT NOT NULL,
+    student_id INT NOT NULL,
     provider_id INT NOT NULL,
     diagnosis_code VARCHAR(10) NOT NULL,
     diagnosis_date DATE NOT NULL,
-    FOREIGN KEY (issue_id) REFERENCES Issue(issue_id),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
     FOREIGN KEY (provider_id) REFERENCES Provider(provider_id),
     FOREIGN KEY (diagnosis_code) REFERENCES Diagnosis_List(diagnosis_code)
 );
