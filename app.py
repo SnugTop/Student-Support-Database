@@ -290,6 +290,44 @@ def visit_detail(visit_id):
     conn.close()
     return render_template("visit_detail.html", visit=visit, issues=issues)
 
+# ---------- SQL Console ----------
+@app.route("/sql", methods=["GET", "POST"])
+def sql_console():
+    query = ""
+    headers = []
+    rows = []
+    error = None
+
+    if request.method == "POST":
+        query = request.form.get("query", "").strip()
+
+        if query:
+            upper = query.lstrip().upper()
+            if not upper.startswith("SELECT"):
+                error = "Only SELECT queries are allowed (read-only)."
+            else:
+                conn = None
+                try:
+                    conn = get_db_connection()
+                    cur = conn.execute(query)
+                    rows = cur.fetchall()
+                    # cur.description has column metadata
+                    if cur.description:
+                        headers = [col[0] for col in cur.description]
+                except sqlite3.Error as e:
+                    error = f"SQL error: {e}"
+                finally:
+                    if conn:
+                        conn.close()
+
+    return render_template(
+        "sql_console.html",
+        query=query,
+        headers=headers,
+        rows=rows,
+        error=error,
+    )
+
 # ---------- REFERRALS & FOLLOWUPS ----------
 @app.route("/referrals")
 def list_referrals():

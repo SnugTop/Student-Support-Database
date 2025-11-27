@@ -242,3 +242,14 @@ body {
   font-size: 0.8rem;
   color: #9ca3af;
 }
+
+/* --------- SQL textarea --------- */
+.sql-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ccd1d9;
+  font-family: monospace;
+  font-size: 0.9rem;
+  resize: vertical;
+}

@@ -31,7 +31,7 @@
         {% endif %}
       </section>
 
-            <section class="grid">
+        <section class="grid">
         <a class="card-link" href="{{ url_for('list_students') }}">
           <div class="card">
             <h3>Students</h3>
@@ -60,8 +60,13 @@
           </div>
         </a>
 
+        <a class="card-link" href="{{ url_for('sql_console') }}">
+            <div class="card">
+                <h3>SQL Console</h3>
+                <p>Run custom read-only queries on the database.</p>
+           </div>
+        </a>
       </section>
-
     </main>
 
     <footer class="footer">
