@@ -17,8 +17,48 @@
         <h2>Counselors</h2>
         <p>View counselor information from the database.</p>
         <p style="margin-top: 0.5rem;">
+          <a href="{{ url_for('add_counselor') }}" class="button-link">+ Add Counselor</a>
           <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
         </p>
+
+        <form method="get">
+          <label>Type:
+            <select name="type">
+              <option value="">Any</option>
+              <option value="paid" {% if type_filter == 'paid' %}selected{% endif %}>Paid</option>
+              <option value="volunteer" {% if type_filter == 'volunteer' %}selected{% endif %}>Volunteer</option>
+            </select>
+          </label>
+
+          <label>Education:
+            <select name="education">
+              <option value="">Any</option>
+              {% for edu in educations %}
+                <option value="{{ edu }}" {% if education_filter == edu %}selected{% endif %}>{{ edu }}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label>Experience:
+            <select name="exp_operator">
+              <option value=">=" {% if exp_operator == ">=" %}selected{% endif %}>>=</option>
+              <option value="<=" {% if exp_operator == "<=" %}selected{% endif %}><=</option>
+              <option value="=" {% if exp_operator == "=" %}selected{% endif %}>=</option>
+            </select>
+            <input type="number" name="exp_value" value="{{ exp_value }}">
+          </label>
+
+          <label>Salary:
+            <select name="salary_operator">
+              <option value=">=" {% if salary_operator == ">=" %}selected{% endif %}>>=</option>
+              <option value="<=" {% if salary_operator == "<=" %}selected{% endif %}><=</option>
+              <option value="=" {% if salary_operator == "=" %}selected{% endif %}>=</option>
+            </select>
+            <input type="number" name="salary_value" value="{{ salary_value }}">
+          </label>
+
+          <button type="submit">Filter</button>
+        </form>
       </div>
 
       <div class="card">
@@ -30,21 +70,24 @@
               <th>Type</th>
               <th>Education</th>
               <th>Experience (years)</th>
+              <th>Salary</th>
             </tr>
           </thead>
           <tbody>
             {% for c in counselors %}
               <tr>
-                <td>{{ c.counselor_id }}</td>
+                <td><a href="{{ url_for('counselor_view', counselor_id=c.counselor_id) }}">{{ c.counselor_id }}</a></td>
                 <td>{{ c.name }}</td>
                 <td>{{ c.paid_volunteer }}</td>
                 <td>{{ c.education }}</td>
                 <td>{{ c.experience }}</td>
+                <td>{% if c.salary %}${{ c.salary }}{% endif %}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+
     </main>
   </div>
 </body>

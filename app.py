@@ -291,15 +291,368 @@ def edit_student(student_id):
     return render_template("student_form.html", student=student)
 
 # ---------- COUNSELORS ----------
-
 @app.route("/counselors")
 def list_counselors():
     conn = get_db_connection()
-    counselors = conn.execute(
-        "SELECT * FROM Counselor ORDER BY name"
-    ).fetchall()
+
+    # Get filter values from request
+    type_filter = request.args.get("type", "")
+    education_filter = request.args.get("education", "")
+    exp_operator = request.args.get("exp_operator", ">=")
+    exp_value = request.args.get("exp_value", "")
+    salary_operator = request.args.get("salary_operator", ">=")
+    salary_value = request.args.get("salary_value", "")
+
+    # Base query
+    query = """
+        SELECT c.*, cs.salary
+        FROM Counselor c
+        LEFT JOIN Counselor_Salary cs ON c.counselor_id = cs.counselor_id
+        WHERE 1=1
+    """
+    params = []
+
+    if type_filter:
+        query += " AND c.paid_volunteer = ?"
+        params.append(type_filter)
+
+    if education_filter:
+        query += " AND c.education = ?"
+        params.append(education_filter)
+
+    if exp_value:
+        query += f" AND c.experience {exp_operator} ?"
+        params.append(exp_value)
+
+    if salary_value:
+        query += f" AND (cs.salary {salary_operator} ?) "
+        params.append(salary_value)
+
+    query += " ORDER BY c.name"
+    counselors = conn.execute(query, params).fetchall()
+
+    # Get distinct education options for dropdown
+    educations = [row["education"] for row in conn.execute("SELECT DISTINCT education FROM Counselor").fetchall()]
+
     conn.close()
-    return render_template("counselors.html", counselors=counselors)
+
+    return render_template(
+        "counselors.html",
+        counselors=counselors,
+        type_filter=type_filter,
+        education_filter=education_filter,
+        exp_operator=exp_operator,
+        exp_value=exp_value,
+        salary_operator=salary_operator,
+        salary_value=salary_value,
+        educations=educations
+    )
+
+# ---------- COUNSELOR VIEW ----------
+
+@app.route("/counselor/<int:counselor_id>", methods=["GET"])
+def counselor_view(counselor_id):
+    conn = get_db_connection()
+
+    # Basic counselor info (including salary if exists)
+    counselor = conn.execute("""
+        SELECT c.*, cs.salary
+        FROM Counselor c
+        LEFT JOIN Counselor_Salary cs ON c.counselor_id = cs.counselor_id
+        WHERE c.counselor_id = ?
+    """, (counselor_id,)).fetchone()
+
+    # --- Students and number of visits ---
+    students = conn.execute("""
+        SELECT s.student_id, s.name, COUNT(vc.visit_id) AS visit_count
+        FROM Visit_Counselor vc
+        JOIN Visit v ON vc.visit_id = v.visit_id
+        JOIN Student s ON v.student_id = s.student_id
+        WHERE vc.counselor_id = ?
+        GROUP BY s.student_id, s.name
+        ORDER BY visit_count DESC
+    """, (counselor_id,)).fetchall()
+
+    # --- Visits (most recent first) ---
+    visits = conn.execute("""
+        SELECT v.visit_id, v.date, s.student_id, s.name AS student_name
+        FROM Visit_Counselor vc
+        JOIN Visit v ON vc.visit_id = v.visit_id
+        JOIN Student s ON v.student_id = s.student_id
+        WHERE vc.counselor_id = ?
+        ORDER BY v.date DESC
+    """, (counselor_id,)).fetchall()
+
+    # --- Followups ---
+    # Incomplete (NULL, empty string, or 0)
+    incomplete_followups = conn.execute("""
+        SELECT 
+            f.followup_id,
+            f.visit_id,
+            v.date AS visit_date,
+            s.student_id,
+            s.name AS student_name,
+            f.date AS followup_date,
+            f.notes
+        FROM Followup f
+        JOIN Visit v ON v.visit_id = f.visit_id
+        JOIN Student s ON s.student_id = v.student_id
+        WHERE f.counselor_id = ?
+        AND (
+            f.complete IS NULL
+            OR f.complete = ''
+            OR f.complete = 0
+        )
+        ORDER BY f.followup_id ASC
+    """, (counselor_id,)).fetchall()
+
+
+
+    # Completed (complete is present and not empty/zero)
+    completed_followups = conn.execute("""
+        SELECT 
+            f.followup_id,
+            f.visit_id,
+            f.date,
+            f.notes,
+            f.complete,
+            s.student_id,
+            s.name AS student_name,
+            v.date AS visit_date
+        FROM Followup f
+        JOIN Visit v ON v.visit_id = f.visit_id
+        JOIN Student s ON s.student_id = v.student_id
+        WHERE f.counselor_id = ?
+        AND NOT (
+            f.complete IS NULL
+            OR f.complete = ''
+            OR f.complete = 0
+        )
+        ORDER BY f.date DESC
+    """, (counselor_id,)).fetchall()
+
+
+
+    # --- Referrals (include student_reported_at) ---
+    referrals = conn.execute("""
+        SELECT r.*, v.student_id, s.name AS student_name
+        FROM Referral r
+        JOIN Issue i ON i.issue_id = r.issue_id
+        JOIN Visit v ON v.visit_id = i.visit_id
+        JOIN Visit_Counselor vc ON vc.visit_id = v.visit_id
+        JOIN Student s ON s.student_id = v.student_id
+        WHERE vc.counselor_id = ?
+        ORDER BY (r.student_reported_at IS NOT NULL) ASC, r.created_at DESC
+    """, (counselor_id,)).fetchall()
+
+    # --- Financial Issues ---
+    financial = conn.execute("""
+        SELECT f.*, v.student_id, s.name AS student_name
+        FROM Financial f
+        JOIN Issue i ON i.issue_id = f.issue_id
+        JOIN Visit v ON v.visit_id = i.visit_id
+        JOIN Visit_Counselor vc ON vc.visit_id = v.visit_id
+        JOIN Student s ON s.student_id = v.student_id
+        WHERE vc.counselor_id = ?
+        ORDER BY (f.student_reported_at IS NOT NULL) ASC, f.created_at DESC
+    """, (counselor_id,)).fetchall()
+
+    # --- Coursework Issues ---
+    coursework = conn.execute("""
+        SELECT c.*, v.student_id, s.name AS student_name
+        FROM Coursework c
+        JOIN Issue i ON i.issue_id = c.issue_id
+        JOIN Visit v ON v.visit_id = i.visit_id
+        JOIN Visit_Counselor vc ON vc.visit_id = v.visit_id
+        JOIN Student s ON s.student_id = v.student_id
+        WHERE vc.counselor_id = ?
+        ORDER BY (c.student_reported_at IS NOT NULL) ASC, c.created_at DESC
+    """, (counselor_id,)).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "counselor_view.html",
+        counselor=counselor,
+        counselor_id=counselor_id,
+        students=students,
+        visits=visits,
+        incomplete_followups=incomplete_followups,
+        completed_followups=completed_followups,
+        referrals=referrals,
+        financial=financial,
+        coursework=coursework
+    )
+
+@app.route("/counselors/new", methods=["GET", "POST"])
+def add_counselor():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        paid_volunteer = request.form.get("paid_volunteer", "").strip()  # 'paid' or 'volunteer'
+        education = request.form.get("education", "").strip()
+        experience = request.form.get("experience", "") or None
+        salary = request.form.get("salary", "") or None
+
+        conn = get_db_connection()
+        # next id
+        row = conn.execute("SELECT COALESCE(MAX(counselor_id), 0) + 1 AS next_id FROM Counselor").fetchone()
+        next_id = row["next_id"]
+
+        conn.execute("""
+            INSERT INTO Counselor (counselor_id, name, paid_volunteer, education, experience)
+            VALUES (?, ?, ?, ?, ?)
+        """, (next_id, name, paid_volunteer, education, experience))
+        # add salary only if paid and salary provided
+        if paid_volunteer.lower() == "paid" and salary not in (None, ""):
+            conn.execute("INSERT OR REPLACE INTO Counselor_Salary (counselor_id, salary) VALUES (?, ?)",
+                         (next_id, salary))
+        conn.commit()
+        conn.close()
+        return redirect(url_for("list_counselors"))
+
+    # GET
+    return render_template("counselors_new.html")
+
+
+# ---------- UPDATE Followup ----------
+
+@app.route("/update_followup/<int:followup_id>", methods=["POST"])
+def update_followup(followup_id):
+    date = request.form.get("date")
+    notes = request.form.get("notes")
+    complete_checkbox = request.form.get("complete")  # None if unchecked
+
+    conn = get_db_connection()
+
+    # 1. Look up the followup being edited
+    f = conn.execute("""
+        SELECT followup_id, visit_id, counselor_id
+        FROM Followup
+        WHERE followup_id = ?
+    """, (followup_id,)).fetchone()
+
+    if not f:
+        return "Followup not found", 404
+
+    visit_id = f["visit_id"]
+    counselor_id = f["counselor_id"]
+
+    # 2. Always mark current followup as "completed" (complete = 1)
+    conn.execute("""
+        UPDATE Followup
+        SET date = ?, notes = ?, complete = 1
+        WHERE followup_id = ?
+    """, (date, notes, followup_id))
+
+    # 3. If the counselor did NOT check "complete", create a new future followup
+    cur = conn.execute("SELECT COALESCE(MAX(followup_id), 0) + 1 FROM Followup")
+    new_id = cur.fetchone()[0]
+
+    if not complete_checkbox:
+        conn.execute("""
+            INSERT INTO Followup (followup_id, visit_id, counselor_id, date, notes, complete)
+            VALUES (?, ?, ?, NULL, NULL, NULL)
+        """, (new_id, visit_id, counselor_id))
+
+    conn.commit()
+
+    return redirect(url_for("counselor_view", counselor_id=counselor_id))
+
+
+
+
+# ---------- UPDATE Referral ----------
+@app.route("/update_referral/<int:referral_id>", methods=["POST"])
+def update_referral(referral_id):
+    student_report = request.form.get("student_report", None) or None
+    student_reported_at = request.form.get("student_reported_at", None) or None
+    details = request.form.get("details", None) or None
+
+    conn = get_db_connection()
+    # optional: fetch counselor id to redirect back
+    row = conn.execute("SELECT r.* FROM Referral r WHERE referral_id = ?", (referral_id,)).fetchone()
+    if not row:
+        conn.close()
+        return "Referral not found", 404
+
+    # Find counselor via visit -> issue -> visit_counselor
+    issue_id = row["issue_id"]
+    visit_row = conn.execute("SELECT visit_id FROM Issue WHERE issue_id = ?", (issue_id,)).fetchone()
+    counselor_row = conn.execute("SELECT counselor_id FROM Visit_Counselor WHERE visit_id = ?", (visit_row["visit_id"],)).fetchone()
+    counselor_id = counselor_row["counselor_id"] if counselor_row else None
+
+    conn.execute("""
+        UPDATE Referral
+        SET student_report = ?, student_reported_at = ?, details = ?
+        WHERE referral_id = ?
+    """, (student_report, student_reported_at, details, referral_id))
+
+    conn.commit()
+    conn.close()
+    if counselor_id:
+        return redirect(url_for("counselor_view", counselor_id=counselor_id))
+    return redirect(url_for("list_counselors"))
+
+
+# ---------- UPDATE Financial ----------
+@app.route("/update_financial/<int:financial_id>", methods=["POST"])
+def update_financial(financial_id):
+    student_report = request.form.get("student_report", None) or None
+    student_reported_at = request.form.get("student_reported_at", None) or None
+    job_notes = request.form.get("job_notes", None) or None
+
+    conn = get_db_connection()
+    row = conn.execute("SELECT f.* FROM Financial f WHERE financial_id = ?", (financial_id,)).fetchone()
+    if not row:
+        conn.close()
+        return "Financial not found", 404
+
+    issue_id = row["issue_id"]
+    visit_row = conn.execute("SELECT visit_id FROM Issue WHERE issue_id = ?", (issue_id,)).fetchone()
+    counselor_row = conn.execute("SELECT counselor_id FROM Visit_Counselor WHERE visit_id = ?", (visit_row["visit_id"],)).fetchone()
+    counselor_id = counselor_row["counselor_id"] if counselor_row else None
+
+    conn.execute("""
+        UPDATE Financial
+        SET student_report = ?, student_reported_at = ?, job_notes = ?
+        WHERE financial_id = ?
+    """, (student_report, student_reported_at, job_notes, financial_id))
+
+    conn.commit()
+    conn.close()
+    if counselor_id:
+        return redirect(url_for("counselor_view", counselor_id=counselor_id))
+    return redirect(url_for("list_counselors"))
+
+
+# ---------- UPDATE Coursework ----------
+@app.route("/update_coursework/<int:coursework_id>", methods=["POST"])
+def update_coursework(coursework_id):
+    student_report = request.form.get("student_report", None) or None
+    student_reported_at = request.form.get("student_reported_at", None) or None
+    conn = get_db_connection()
+    row = conn.execute("SELECT * FROM Coursework WHERE coursework_id = ?", (coursework_id,)).fetchone()
+    if not row:
+        conn.close()
+        return "Coursework not found", 404
+
+    issue_id = row["issue_id"]
+    visit_row = conn.execute("SELECT visit_id FROM Issue WHERE issue_id = ?", (issue_id,)).fetchone()
+    counselor_row = conn.execute("SELECT counselor_id FROM Visit_Counselor WHERE visit_id = ?", (visit_row["visit_id"],)).fetchone()
+    counselor_id = counselor_row["counselor_id"] if counselor_row else None
+
+    conn.execute("""
+        UPDATE Coursework
+        SET student_report = ?, student_reported_at = ?
+        WHERE coursework_id = ?
+    """, (student_report, student_reported_at, coursework_id))
+
+    conn.commit()
+    conn.close()
+    if counselor_id:
+        return redirect(url_for("counselor_view", counselor_id=counselor_id))
+    return redirect(url_for("list_counselors"))
+
 
 # ---------- VISITS & ISSUES ----------
 

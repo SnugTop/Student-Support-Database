@@ -172,12 +172,12 @@ CREATE TABLE Symptom (
 -- -----------------------------
 CREATE TABLE Followup (
     followup_id INT PRIMARY KEY,
-    issue_id INT NOT NULL,
+    visit_id INT NOT NULL,
     counselor_id INT NOT NULL,
     date DATE,
     notes TEXT,
     complete BOOLEAN,
-    FOREIGN KEY (issue_id) REFERENCES Issue(issue_id),
+    FOREIGN KEY (visit_id) REFERENCES Visit(visit_id),
     FOREIGN KEY (counselor_id) REFERENCES Counselor(counselor_id)
 );
 
