@@ -7,6 +7,7 @@
 </head>
 <body>
   <div class="page">
+    <!-- Header -->
     <header class="top-bar">
       <div class="logo-circle">SSC</div>
       <h1>Visit {{ visit.visit_id }}</h1>
@@ -19,11 +20,17 @@
         <p><strong>Student:</strong> {{ visit.student_name }} (ID: {{ visit.student_id }})</p>
         <p><strong>Date:</strong> {{ visit.date }}</p>
         <p><strong>Mode:</strong> {{ visit.mode }}</p>
+        <p><strong>Counselors:</strong> 
+          {% if counselors %}
+            {{ counselors|map(attribute='name')|join(', ') }}
+          {% else %}
+            None
+          {% endif %}
+        </p>
 
         <p style="margin-top: 0.75rem;">
-          <a href="{{ url_for('list_visits') }}" class="button-link secondary">
-            ← Back to Visits
-          </a>
+          <a href="{{ url_for('list_visits') }}" class="button-link secondary">← Back to Visits</a>
+          <a href="{{ url_for('edit_visit', visit_id=visit.visit_id) }}" class="button-link">Edit Details</a>
         </p>
       </div>
 
@@ -38,6 +45,9 @@
                 <th>Issue ID</th>
                 <th>Description</th>
                 <th>Severity</th>
+                <th>Categories</th>
+                <th>Types</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -52,7 +62,24 @@
                       <span class="badge ok">Not Critical</span>
                     {% endif %}
                   </td>
+                  <td>{{ i.categories if i.categories else "None" }}</td>
+                  <td>{{ i.issue_types if i.issue_types else "None" }}</td>
+                  <td>
+                    <a href="{{ url_for('edit_issue', issue_id=i.issue_id) }}" class="button-link secondary">Edit Issue</a>
+                  </td>
                 </tr>
+
+                {% if 'Referral' in i.issue_types_list %}
+                  <tr>
+                    <td colspan="6">
+                      <strong>Referral Details:</strong>
+                      {% for ref in i.referrals %}
+                        {{ ref.details }}<br>
+                      {% endfor %}
+                    </td>
+                  </tr>
+                {% endif %}
+
               {% endfor %}
             </tbody>
           </table>
@@ -60,6 +87,66 @@
           <p>No issues recorded for this visit yet.</p>
         {% endif %}
       </div>
+
+      <!-- Suggestions Section -->
+      <div class="card">
+        <h3>Suggestions from Counselors</h3>
+
+        {% if suggestions %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Suggestion ID</th>
+                <th>Counselor</th>
+                <th>Details</th>
+                <th>Student Report</th>
+                <th>Reported At</th>
+                <th>Update</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in suggestions %}
+                <tr>
+                  <td>{{ s.suggestion_id }}</td>
+                  <td>{{ s.counselor_name }}</td>
+                  <td>{{ s.details }}</td>
+
+                  <!-- Student Report -->
+                  <td>
+                    {% if s.student_report %}
+                      {{ s.student_report }}
+                    {% else %}
+                      <form action="{{ url_for('update_suggestion', suggestion_id=s.suggestion_id) }}" method="POST">
+                        <textarea name="student_report" rows="2" cols="30"></textarea>
+                    {% endif %}
+                  </td>
+
+                  <!-- Reported At -->
+                  <td>
+                    {% if s.student_reported_at %}
+                      {{ s.student_reported_at }}
+                    {% else %}
+                        <input type="date" name="student_reported_at">
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if not s.student_report %}
+                      <button type="submit" class="button-link">Save</button>
+                      </form>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>No suggestions recorded for this visit.</p>
+        {% endif %}
+      </div>
+
     </main>
   </div>
 </body>

@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Visits & Issues - Student Support Center</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Choices.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 <body>
 <div class="page">
@@ -26,12 +29,40 @@
       </p>
 
       <form method="get" action="{{ url_for('list_visits') }}" class="search-form">
-        <input type="text"
-               name="search"
-               placeholder="Search by student name or visit ID..."
-               value="{{ search }}"
-               class="search-input">
-        <button type="submit" class="button-link">Search</button>
+        <!-- Student multi-select -->
+        <label for="students">Students:</label>
+        <select id="students" name="students" multiple>
+          {% for s in all_students %}
+            <option value="{{ s.student_id }}" {% if s.student_id|string in selected_students %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Mode -->
+        <label for="mode">Mode:</label>
+        <select id="mode" name="mode">
+          <option value="" {% if not mode %}selected{% endif %}>Any</option>
+          <option value="in-person" {% if mode=='in-person' %}selected{% endif %}>In-Person</option>
+          <option value="virtual" {% if mode=='virtual' %}selected{% endif %}>Virtual</option>
+        </select>
+
+        <!-- Issue count -->
+        <label for="issue_op"># Issues:</label>
+        <select name="issue_op">
+          <option value=">">></option>
+          <option value="<"><</option>
+          <option value="=">=</option>
+        </select>
+        <input type="number" name="issue_val" value="{{ issue_val }}" min="0">
+
+        <!-- Critical -->
+        <label for="critical">Critical:</label>
+        <select id="critical" name="critical">
+          <option value="" {% if not critical %}selected{% endif %}>Any</option>
+          <option value="1" {% if critical=='1' %}selected{% endif %}>Critical</option>
+          <option value="0" {% if critical=='0' %}selected{% endif %}>OK</option>
+        </select>
+
+        <button type="submit" class="button-link">Apply Filters</button>
       </form>
     </div>
 
@@ -85,5 +116,13 @@
   </main>
 
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const studentSelect = document.getElementById('students');
+    if (studentSelect) {
+      new Choices(studentSelect, { removeItemButton: true, searchResultLimit: 10, placeholderValue: 'Select students' });
+    }
+  });
+</script>
 </body>
 </html>

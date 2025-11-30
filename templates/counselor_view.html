@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Counselor View</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<div class="page">
+
+<header class="top-bar">
+    <div class="logo-circle">SSC</div>
+    <h1>Counselor {{ counselor.counselor_id }} — {{ counselor.name }}</h1>
+</header>
+
+<main class="content">
+
+    <p><a href="{{ url_for('list_counselors') }}" class="button-link secondary">← Back</a></p>
+
+    <!-- Counselor Basic Info -->
+    <div class="card">
+        <h2>Basic Info</h2>
+        <p><strong>Type:</strong> {{ counselor.paid_volunteer }}</p>
+        <p><strong>Education:</strong> {{ counselor.education }}</p>
+        <p><strong>Experience:</strong> {{ counselor.experience }}</p>
+        <p><strong>Salary:</strong>
+            {% if counselor.paid_volunteer|lower == 'paid' and counselor.salary %}
+                ${{ counselor.salary }}
+            {% else %}
+                {% if counselor.paid_volunteer|lower == 'paid' %}Not set{% else %}Volunteer{% endif %}
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Students Seen -->
+    <div class="card">
+        <h2>Students Met With</h2>
+        <table class="table">
+            <thead><tr><th>Student</th><th>Times Met</th></tr></thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td><a href="{{ url_for('view_student', student_id=s.student_id) }}">{{ s.name }}</a></td>
+                    <td>{{ s.visit_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Visits -->
+    <div class="card">
+        <h2>Visits</h2>
+        <table class="table">
+            <thead><tr><th>Date</th><th>Student</th></tr></thead>
+            <tbody>
+                {% for v in visits %}
+                <tr>
+                    <td>{{ v.date }}</td>
+                    <td><a href="{{ url_for('view_student', student_id=v.student_id) }}">{{ v.student_name }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Followups -->
+    <div class="card">
+        <h2>Open Followups (incomplete)</h2>
+        {% if incomplete_followups|length == 0 %}
+            <p>No open followups.</p>
+        {% endif %}
+        {% for f in incomplete_followups %}
+        <div class="subcard">
+            <p><strong>Followup ID:</strong> {{ f.followup_id }} — Student: <a href="{{ url_for('view_student', student_id=f.student_id) }}">{{ f.student_name }}</a></p>
+            <form method="POST" action="{{ url_for('update_followup', followup_id=f.followup_id) }}">
+                <label>Date:</label>
+                <input type="text" name="date" placeholder="YYYY-MM-DD">
+                <label>Notes:</label>
+                <textarea name="notes"></textarea>
+                <label>Complete:</label>
+                <input type="checkbox" name="complete">
+                <button type="submit">Finish Followup</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="card">
+        <h2>Completed Followups</h2>
+        <table class="table">
+            <thead><tr><th>ID</th><th>Student</th><th>Date</th><th>Notes</th></tr></thead>
+            <tbody>
+                {% for f in completed_followups %}
+                <tr>
+                    <td>{{ f.followup_id }}</td>
+                    <td><a href="{{ url_for('view_student', student_id=f.student_id) }}">{{ f.student_name }}</a></td>
+                    <td>{{ f.date }}</td>
+                    <td>{{ f.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Referrals -->
+    <div class="card">
+        <h2>Referrals</h2>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Student</th><th>Details</th><th>Created</th><th>Student Report</th><th>Student Report Date</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for r in referrals %}
+                <tr class="{% if not r.student_reported_at %}highlight{% endif %}">
+                    <td>{{ r.referral_id }}</td>
+                    <td><a href="{{ url_for('view_student', student_id=r.student_id) }}">{{ r.student_name }}</a></td>
+                    <td>
+                        <form method="POST" action="{{ url_for('update_referral', referral_id=r.referral_id) }}">
+                            <input type="text" name="details" value="{{ r.details or '' }}">
+                    </td>
+                    <td>{{ r.created_at }}</td>
+                    <td><input type="text" name="student_report" value="{{ r.student_report or '' }}"></td>
+                    <td><input type="text" name="student_reported_at" value="{{ r.student_reported_at or '' }}" placeholder="YYYY-MM-DD"></td>
+                    <td>
+                            <button type="submit">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Financial Issues -->
+    <div class="card">
+        <h2>Financial Issues</h2>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Student</th><th>Job Notes</th><th>Created</th><th>Student Report</th><th>Student Report Date</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for f in financial %}
+                <tr class="{% if not f.student_reported_at %}highlight{% endif %}">
+                    <td>{{ f.financial_id }}</td>
+                    <td><a href="{{ url_for('view_student', student_id=f.student_id) }}">{{ f.student_name }}</a></td>
+                    <td>
+                        <form method="POST" action="{{ url_for('update_financial', financial_id=f.financial_id) }}">
+                            <input type="text" name="job_notes" value="{{ f.job_notes or '' }}">
+                    </td>
+                    <td>{{ f.created_at }}</td>
+                    <td><input type="text" name="student_report" value="{{ f.student_report or '' }}"></td>
+                    <td><input type="text" name="student_reported_at" value="{{ f.student_reported_at or '' }}" placeholder="YYYY-MM-DD"></td>
+                    <td>
+                            <button type="submit">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Coursework -->
+    <div class="card">
+        <h2>Coursework Issues</h2>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Student</th><th>Course</th><th>Notes</th><th>Created</th><th>Student Report</th><th>Student Report Date</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for c in coursework %}
+                <tr class="{% if not c.student_reported_at %}highlight{% endif %}">
+                    <td>{{ c.coursework_id }}</td>
+                    <td><a href="{{ url_for('view_student', student_id=c.student_id) }}">{{ c.student_name }}</a></td>
+                    <td>{{ c.course_id }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('update_coursework', coursework_id=c.coursework_id) }}">
+                            <input type="text" name="notes" value="{{ c.student_report or '' }}">
+                    </td>
+                    <td>{{ c.created_at }}</td>
+                    <td><input type="text" name="student_report" value="{{ c.student_report or '' }}"></td>
+                    <td><input type="text" name="student_reported_at" value="{{ c.student_reported_at or '' }}" placeholder="YYYY-MM-DD"></td>
+                    <td>
+                            <button type="submit">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+</div>
+</body>
+</html>

@@ -1,6 +1,8 @@
 --sqllite version
 
 .mode csv
+PRAGMA foreign_keys = OFF;
+
 
 .import --skip 1 data/Category.csv Category
 .import --skip 1 data/Counselor.csv Counselor

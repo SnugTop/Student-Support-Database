@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student View</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<div class="page">
+
+<header class="top-bar">
+    <div class="logo-circle">SSC</div>
+    <h1>Student {{ student.student_id }} - {{ student.name }}</h1>
+</header>
+
+<main class="content">
+
+<p><a href="{{ url_for('list_students') }}" class="button-link secondary">← Back</a></p>
+
+<!-- BASIC INFO -->
+<div class="card">
+    <h2>Basic Information</h2>
+
+    <form method="post" class="form-grid">
+        <input type="hidden" name="form_type" value="basic_info">
+
+        <label>Name</label>
+        <input type="text" name="name" value="{{ student.name }}">
+
+        <label>Date of Birth</label>
+        <input type="text" name="dob" value="{{ student.dob }}">
+
+        <label>Country of Birth</label>
+        <input type="text" name="country_of_birth" value="{{ student.country_of_birth }}">
+
+        <label>Gender</label>
+        <select name="gender">
+            <option value="M" {% if student.gender == 'M' %}selected{% endif %}>M</option>
+            <option value="F" {% if student.gender == 'F' %}selected{% endif %}>F</option>
+        </select>
+
+        <label>Consent</label>
+        <input type="checkbox" name="consent" {% if student.consent %}checked{% endif %}>
+
+        <label>ZIP Code</label>
+        <input type="text" name="zip_code" value="{{ student.zip_code }}">
+
+        <button type="submit">Update</button>
+    </form>
+</div>
+
+
+
+<!-- VISITS -->
+<div class="card">
+    <h2>Visits</h2>
+
+    {% for vd in visits %}
+    <div class="subcard">
+        <h3>{{ vd.visit.date }} — {{ vd.visit.mode }}</h3>
+
+        {% for issue_entry in vd.issues %}
+        <div class="issue-block">
+            <p><strong>{{ issue_entry.issue.issue_description }}</strong></p>
+
+            <p>
+                <strong>Critical:</strong>
+                <input type="checkbox" {% if issue_entry.issue.severity %}checked{% endif %} disabled>
+            </p>
+
+            <p><strong>Types:</strong> {{ issue_entry.types | join(", ") }}</p>
+            <p><strong>Categories:</strong> {{ issue_entry.categories | join(", ") }}</p>
+
+            <p><strong>Suggestions:</strong></p>
+            <ul>
+                {% for s in issue_entry.suggestions %}
+                <li>{{ s.details }} — {{ s.counselor_name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+
+
+<!-- DIAGNOSES -->
+<div class="card">
+    <h2>Diagnoses</h2>
+
+    {% for diag in diagnoses %}
+        {% if diag.editable %}
+        <!-- EDITABLE DIAGNOSIS -->
+        <form method="post" action="{{ url_for('edit_diagnosis', diagnosis_id=diag.diagnosis_id) }}" class="form-grid">
+
+            <label>Date</label>
+            <input type="text" name="diagnosis_date" value="{{ diag.diagnosis_date }}">
+
+            <label>Provider</label>
+            <select name="provider_id">
+                {% for p in providers %}
+                <option value="{{ p.provider_id }}" {% if p.provider_id == diag.provider_id %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Diagnosis</label>
+            <select name="diagnosis_code">
+                {% for d in diag_list %}
+                <option value="{{ d.diagnosis_code }}" {% if d.diagnosis_code == diag.diagnosis_code %}selected{% endif %}>
+                    {{ d.diagnosis }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Symptoms</label>
+            <select name="symptoms" multiple>
+                {% for s in symptoms_all %}
+                <option value="{{ s.symptom_code }}" {% if s.symptom in diag.symptoms %}selected{% endif %}>
+                    {{ s.symptom }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Save</button>
+            <a href="{{ url_for('view_student', student_id=student.student_id) }}" class="button-link">Cancel</a>
+
+        </form>
+
+        {% else %}
+        <!-- READ ONLY DIAGNOSIS -->
+        <div class="subcard">
+            <p><strong>Date:</strong> {{ diag.diagnosis_date }}</p>
+            <p><strong>Provider:</strong> {{ diag.provider_name }}</p>
+            <p><strong>Diagnosis:</strong> {{ diag.diagnosis_name }}</p>
+            <p><strong>Symptoms:</strong> 
+                {% if diag.symptoms %}{{ diag.symptoms | join(", ") }}{% else %}None{% endif %}
+            </p>
+
+            <a class="button-link"
+               href="{{ url_for('view_student', student_id=student.student_id, edit_diag_id=diag.diagnosis_id) }}">
+               Edit
+            </a>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    <h3>Add New Diagnosis</h3>
+
+    <form method="post" action="{{ url_for('add_diagnosis', student_id=student.student_id) }}" class="form-grid">
+        <label>Date</label>
+        <input type="text" name="diagnosis_date">
+
+        <label>Provider</label>
+        <select name="provider_id">
+            {% for p in providers %}
+            <option value="{{ p.provider_id }}">{{ p.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Diagnosis</label>
+        <select name="diagnosis_code">
+            {% for d in diag_list %}
+            <option value="{{ d.diagnosis_code }}">{{ d.diagnosis }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Symptoms</label>
+        <select name="symptoms" multiple>
+            {% for s in symptoms_all %}
+            <option value="{{ s.symptom_code }}">{{ s.symptom }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Add</button>
+    </form>
+</div>
+
+
+
+
+<!-- COURSES -->
+<div class="card">
+    <h2>Courses</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Teacher</th>
+                <th>Classroom</th>
+                <th>Period</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for c in courses %}
+        <tr>
+            <td>{{ c.course_name }}</td>
+            <td>{{ c.teacher }}</td>
+            <td>{{ c.classroom }}</td>
+            <td>{{ c.period }}</td>
+            <td>
+                <a href="{{ url_for('remove_course', student_id=student.student_id, course_id=c.course_id) }}"
+                   class="button-link">Remove</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Add Course</h3>
+    <form method="post" action="{{ url_for('add_course', student_id=student.student_id) }}" class="form-grid">
+        <label>Course</label>
+        <select name="course_id">
+            {% for c in all_courses %}
+            <option value="{{ c.course_id }}">{{ c.course_name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Add</button>
+    </form>
+</div>
+
+</main>
+
+</div>
+</body>
+</html>

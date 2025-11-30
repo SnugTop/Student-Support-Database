@@ -1,98 +1,98 @@
-suggestion_id,visit_id,counselor_id,details
-1,1,100,"Encouraged student to track symptoms and visit nurse if they worsen."
-2,2,101,"Suggested student create a simple weekly planner to stay organized."
-3,3,102,"Recommended discussing course load with teacher for adjustments."
-4,3,102,"Advised taking regular breaks during study sessions."
-5,4,101,"Suggested practicing social check-ins with trusted peers."
-7,6,103,"Recommended trying deep breathing techniques before class."
-8,7,104,"Suggested student speak with a teacher about classroom concerns."
-9,8,102,"Encouraged student to connect with a friend group during lunch."
-10,8,102,"Suggested limiting screen time before bed to improve sleep."
-11,9,105,"Recommended visiting nurse if headaches return."
-12,10,104,"Suggested student start a daily mood journal."
-13,11,106,"Encouraged reviewing class materials in shorter intervals."
-14,12,103,"Advised student to join a study group for support."
-15,12,103,"Suggested students set realistic weekly goals."
-16,13,107,"Encouraged student to talk with parent about any concerns at home."
-17,14,104,"Recommended student try brief mindfulness exercises."
-18,14,107,"Suggested student practice expressing concerns to peers calmly."
-19,15,108,"Advised reducing late-night screen time to improve sleep."
-20,15,108,"Recommended reaching out to a trusted adult when overwhelmed."
-21,16,100,"Suggested taking short breaks when feeling stressed."
-22,17,109,"Encouraged student to outline pros and cons for scheduling choices."
-23,18,106,"Suggested student connect with counselor again if symptoms worsen."
-24,19,102,"Recommended discussing college interests with family."
-25,20,105,"Suggested limiting multitasking to improve focus."
-26,21,111,"Recommended student talk with coach about workload concerns."
-27,21,111,"Encouraged joining school club for additional connection."
-28,22,103,"Suggested using stress-relief exercises before tests."
-29,23,112,"Encouraged student to take breaks when overwhelmed socially."
-30,24,101,"Suggested writing down class concerns before meeting with teacher."
-32,26,107,"Suggested organizing materials nightly to avoid confusion."
-33,27,105,"Recommended checking in with teacher about assignment clarity."
-34,28,110,"Suggested reviewing class schedule with counselor for adjustments."
-36,30,109,"Suggested engaging in after-school activities to reduce stress."
-37,31,112,"Recommended student create a weekly academic checklist."
-38,31,112,"Encouraged reaching out to trusted adult when anxious."
-39,32,105,"Suggested meeting with teacher to discuss participation concerns."
-40,33,112,"Encouraged deep breathing exercises during stressful classes."
-41,34,100,"Suggested connecting with friends to reduce loneliness."
-42,35,106,"Encouraged tracking mood patterns for later discussion."
-43,36,111,"Recommended exploring clubs to expand social circle."
-44,37,103,"Suggested practicing rest-to-focus cycles during homework."
-45,38,107,"Encouraged student to keep a simple daily routine."
-46,39,102,"Suggested student ask for clarification in class when confused."
-47,39,108,"Recommended speaking with school nurse if symptoms recur."
-48,40,104,"Suggested student identify one coping skill to use during stress."
-49,41,109,"Encouraged student to take short movement breaks."
-50,42,111,"Suggested student practice speaking up in group settings."
-51,43,101,"Encouraged student to ask teacher for guided reading strategies."
-53,45,110,"Recommended joining a peer-support activity."
-54,46,105,"Encouraged student to communicate with parent about concerns."
-56,48,111,"Recommended building consistent sleep schedule."
-57,49,103,"Encouraged using organizational tools for classwork."
-58,50,112,"Suggested reducing distractions during homework time."
-59,51,107,"Encouraged grounding techniques during moments of stress."
-60,52,104,"Suggested student identify trusted peer to talk to."
-61,53,109,"Recommended beginning assignments earlier to avoid stress."
-62,54,111,"Encouraged journaling before bed to settle thoughts."
-63,55,102,"Suggested practicing communication skills with peers."
-64,56,100,"Encouraged student to create small achievable goals."
-65,57,108,"Suggested student check in with counselor weekly for support."
-66,58,110,"Recommended student reflect on college interests gradually."
-67,59,104,"Encouraged student to break tasks into manageable steps."
-68,59,112,"Suggested trying mindfulness activities before class."
-70,61,105,"Suggested planning ahead for busy school weeks."
-71,62,106,"Encouraged student to use calming strategies during conflict."
-72,63,107,"Suggested student practice focusing exercises."
-73,64,103,"Encouraged reflecting on recent stress triggers."
-74,65,101,"Suggested preparing questions before meeting teachers."
-75,66,111,"Recommended avoiding overwhelming social situations temporarily."
-76,67,100,"Encouraged student to take breaks when feeling tired."
-77,68,112,"Suggested deep breathing when overwhelmed."
-79,70,104,"Recommended student talk with peer mentor."
-80,71,111,"Suggested practicing short reflection journaling."
-81,72,102,"Encouraged establishing consistent morning routine."
-82,73,106,"Suggested setting aside daily study time."
-83,74,107,"Recommended keeping track of family-related stressors."
-84,75,105,"Encouraged healthy sleep habits to improve mood."
-85,76,110,"Suggested mapping out college steps over time."
-86,77,103,"Encouraged practicing organization and planning skills."
-88,79,100,"Encouraged taking short walks to reduce anxiety."
-89,80,112,"Recommended identifying one peer for social support."
-90,81,104,"Suggested speaking with teacher about workload."
-91,82,101,"Encouraged student to write down academic concerns."
-92,83,107,"Suggested meeting with counselor again if stress increases."
-93,84,100,"Recommended using breathing exercises during frustration."
-94,85,105,"Encouraged reaching out to family when overwhelmed."
-95,86,109,"Suggested tracking daily habits for discussion."
-97,88,108,"Suggested talking to trusted adult about emotions."
-98,89,102,"Encouraged using grounding techniques during anxiety."
-99,90,111,"Suggested student discuss concerns calmly with family."
-100,91,104,"Encouraged practicing stress-relief strategies after school."
-102,93,103,"Encouraged student to prepare for conversations with teachers."
-103,94,107,"Suggested identifying emotional triggers."
-104,95,101,"Encouraged student to talk through difficult feelings."
-106,97,105,"Encouraged finding quiet space when overwhelmed."
-108,99,112,"Suggested following up if academic concerns continue."
-109,100,106,"Encouraged organizing backpack nightly."
+suggestion_id,visit_id,counselor_id,details,student_report,student_reported_at
+1,1,100,"Encouraged student to track symptoms and visit nurse if they worsen.","I started writing down when I feel bad and went to the nurse twice this week. It helped.",9/10/2025
+2,2,101,"Suggested student create a simple weekly planner to stay organized.","I made a planner on paper and it’s actually keeping me from forgetting stuff.",9/12/2025
+3,3,102,"Recommended discussing course load with teacher for adjustments.","I talked to my math teacher and she let me drop one big project. I feel less stressed now.",9/15/2025
+4,3,102,"Advised taking regular breaks during study sessions.","I’ve been doing 25 minutes study + 5 minutes break and I get way more done.",9/15/2025
+5,4,101,"Suggested practicing social check-ins with trusted peers.","I started texting my two close friends every day after school. It feels nice.",9/18/2025
+7,6,103,"Recommended trying deep breathing techniques before class.","I do the 4-7-8 breathing in the hallway and I’m not as shaky in first period anymore.",9/20/2025
+8,7,104,"Suggested student speak with a teacher about classroom concerns.","I finally told my English teacher I get anxious when called on and she’s been super understanding.",9/21/2025
+9,8,102,"Encouraged student to connect with a friend group during lunch.","I sat with the art kids twice this week and they were really welcoming.",9/22/2025
+10,8,102,"Suggested limiting screen time before bed to improve sleep.","I put my phone away at 10 pm every night and I’m actually falling asleep faster.",9/22/2025
+11,9,105,"Recommended visiting nurse if headaches return.","Headaches came back so I saw the nurse and she gave me some tips. Feeling better.",9/25/2025
+12,10,104,"Suggested student start a daily mood journal.","I’ve been writing how I feel every night and it helps me see patterns.",9/23/2025
+13,11,106,"Encouraged reviewing class materials in shorter intervals.","Studying 15 minutes at a time is way easier than cramming. Thanks!",9/27/2025
+14,12,103,"Advised student to join a study group for support.","I joined the chemistry study group and it’s actually fun and helpful.",10/1/2025
+15,12,103,"Suggested students set realistic weekly goals.","I only set three goals this week and I hit all of them. Feels great.",10/1/2025
+16,13,107,"Encouraged student to talk with parent about any concerns at home.","I talked to my mom and she didn’t freak out like I thought. We made a plan.",9/28/2025
+17,14,104,"Recommended student try brief mindfulness exercises.","I do a 2-minute body scan when I get stressed and it calms me down fast.",10/5/2025
+18,14,107,"Suggested student practice expressing concerns to peers calmly.","I practiced what I’d say with you and then told my friend I needed space sometimes. Went okay.",10/5/2025
+19,15,108,"Advised reducing late-night screen time to improve sleep.","Sleep is so much better since I stopped TikTok at midnight.",9/27/2025
+20,15,108,"Recommended reaching out to a trusted adult when overwhelmed.","I texted my aunt when I was freaking out and she helped me calm down.",9/27/2025
+21,16,100,"Suggested taking short breaks when feeling stressed.","I take a 5-minute walk when I’m overwhelmed now and it really helps.",10/2/2025
+22,17,109,"Encouraged student to outline pros and cons for scheduling choices.","Making the list made it clear I should drop one activity. Thanks.",9/28/2025
+23,18,106,"Suggested student connect with counselor again if symptoms worsen.","Things got worse so I booked another appointment. Thanks for saying that.",10/10/2025
+24,19,102,"Recommended discussing college interests with family.","I talked to my parents about maybe doing community college first and they were supportive.",9/29/2025
+25,20,105,"Suggested limiting multitasking to improve focus.","I only do one thing at a time now and my grades are going up.",10/3/2025
+26,21,111,"Recommended student talk with coach about workload concerns.","Coach cut some practices for me and I can breathe again.",10/8/2025
+27,21,111,"Encouraged joining school club for additional connection.","I joined robotics and already made two new friends.",10/8/2025
+28,22,103,"Suggested using stress-relief exercises before tests.","The breathing thing before the history test worked — I didn’t blank out.",10/5/2025
+29,23,112,"Encouraged student to take breaks when overwhelmed socially.","I started leaving parties early when I need to and nobody got mad.",10/12/2025
+30,24,101,"Suggested writing down class concerns before meeting with teacher.","Having it written down made it easier to talk to Mr. Lee. He fixed the issue.",10/2/2025
+32,26,107,"Suggested organizing materials nightly to avoid confusion.","I clean my backpack every night now and I’m never missing stuff anymore.",10/11/2025
+33,27,105,"Recommended checking in with teacher about assignment clarity.","I asked for clarification and turns out I was doing the project wrong — saved me!",10/14/2025
+34,28,110,"Suggested reviewing class schedule with counselor for adjustments.","We dropped one class and added study hall. Best decision ever.",10/15/2025
+36,30,109,"Suggested engaging in after-school activities to reduce stress.","Joined theater crew and it’s my favorite part of the day now.",10/18/2025
+37,31,112,"Recommended student create a weekly academic checklist.","The checklist keeps me from falling behind. Super helpful.",10/20/2025
+38,31,112,"Encouraged reaching out to trusted adult when anxious.","I called my grandma when I was having a panic attack and she talked me through it.",10/20/2025
+39,32,105,"Suggested meeting with teacher to discuss participation concerns.","Talked to Ms. Rivera and she said I can write answers instead of speaking sometimes.",10/12/2025
+40,33,112,"Encouraged deep breathing exercises during stressful classes.","I do box breathing under my desk in math and nobody notices but it helps a lot.",10/18/2025
+41,34,100,"Suggested connecting with friends to reduce loneliness.","I finally texted the group chat again and we hung out last weekend.",10/16/2025
+42,35,106,"Encouraged tracking mood patterns for later discussion.","I noticed I always crash on Sundays so I’m planning something fun then now.",10/20/2025
+43,36,111,"Recommended exploring clubs to expand social circle.","Joined gaming club and it’s full of chill people. Thanks for the push.",10/17/2025
+44,37,103,"Suggested practicing rest-to-focus cycles during homework.","The 20/5 method is a game changer for homework.",10/19/2025
+45,38,107,"Encouraged student to keep a simple daily routine.","Having the same morning routine makes school days less chaotic.",10/14/2025
+46,39,102,"Suggested student ask for clarification in class when confused.","I started raising my hand when I don’t get it and the teacher explains again. So much better.",10/20/2025
+47,39,108,"Recommended speaking with school nurse if symptoms recur.","Stomach aches came back so I saw the nurse — she thinks it’s stress. Getting help.",10/20/2025
+48,40,104,"Suggested student identify one coping skill to use during stress.","I picked counting backwards from 100 by 7s and it works when I’m spiraling.",10/22/2025
+49,41,109,"Encouraged student to take short movement breaks.","I do 10 jumping jacks every hour and I’m way less fidgety.",10/25/2025
+50,42,111,"Suggested student practice speaking up in group settings.","I spoke twice in group discussion today and didn’t die. Progress!",10/23/2025
+51,43,101,"Encouraged student to ask teacher for guided reading strategies.","Got a reading guide from my English teacher and I actually understand the book now.",10/24/2025
+53,45,110,"Recommended joining a peer-support activity.","The lunch support group is awkward but in a good way. I don’t feel alone anymore.",10/28/2025
+54,46,105,"Encouraged student to communicate with parent about concerns.","Told dad I’m overwhelmed and he’s helping me make a schedule now.",10/30/2025
+56,48,111,"Recommended building consistent sleep schedule.","Going to bed at 10:30 every night has made mornings so much easier.",11/1/2025
+57,49,103,"Encouraged using organizational tools for classwork.","Using Notion for all my assignments now and nothing slips through.",11/2/2025
+58,50,112,"Suggested reducing distractions during homework time.","I put my phone in another room and finish homework in half the time.",11/3/2025
+59,51,107,"Encouraged grounding techniques during moments of stress.","The 5-4-3-2-1 trick pulled me out of a panic attack in the bathroom yesterday.",11/4/2025
+60,52,104,"Suggested student identify trusted peer to talk to.","I told Sarah she’s my safe person and she was really cool about it.",11/5/2025
+61,53,109,"Recommended beginning assignments earlier to avoid stress.","Started my essay a week early for once and I’m not crying at 2 am. Amazing.",11/6/2025
+62,54,111,"Encouraged journaling before bed to settle thoughts.","Writing for 5 minutes at night helps me fall asleep without overthinking.",11/7/2025
+63,55,102,"Suggested practicing communication skills with peers.","I used “I feel” statements with my friend and we didn’t fight. It worked!",11/8/2025
+64,56,100,"Encouraged student to create small achievable goals.","Setting tiny goals every day makes me feel like I’m actually getting somewhere.",11/9/2025
+65,57,108,"Suggested student check in with counselor weekly for support.","Weekly check-ins are keeping me on track. Thanks for offering that.",11/10/2025
+66,58,110,"Recommended student reflect on college interests gradually.","I made a list of careers I might like and it doesn’t feel so scary anymore.",11/11/2025
+67,59,104,"Encouraged student to break tasks into manageable steps.","Breaking projects into baby steps makes them way less terrifying.",11/5/2025
+68,59,112,"Suggested trying mindfulness activities before class.","Doing a quick meditation on the bus is helping a lot.",11/5/2025
+70,61,105,"Suggested planning ahead for busy school weeks.","Planned my whole week on Sunday and it went so smoothly.",11/12/2025
+71,62,106,"Encouraged student to use calming strategies during conflict.","Used deep breathing when my sister yelled and I didn’t yell back for once.",11/13/2025
+72,63,107,"Suggested student practice focusing exercises.","The pomodoro app is keeping me on task better than ever.",11/14/2025
+73,64,103,"Encouraged reflecting on recent stress triggers.","Realized tests and family dinner are my biggest triggers so I’m preparing better.",11/15/2025
+74,65,101,"Suggested preparing questions before meeting teachers.","Wrote down my questions and the meeting with my teacher went great.",11/10/2025
+75,66,111,"Recommended avoiding overwhelming social situations temporarily.","Skipped the big party and stayed home with one friend. Needed that.",11/12/2025
+76,67,100,"Encouraged student to take breaks when feeling tired.","Started taking a 10-minute nap after school and I’m way less grumpy.",11/15/2025
+77,68,112,"Suggested deep breathing when overwhelmed.","Deep breathing in the stall saved me during lunch meltdown.",11/16/2025
+79,70,104,"Recommended student talk with peer mentor.",,
+80,71,111,"Suggested practicing short reflection journaling.",,
+81,72,102,"Encouraged establishing consistent morning routine.",,
+82,73,106,"Suggested setting aside daily study time.","I blocked 4-6 pm every day for homework and it’s working great.",11/10/2025
+83,74,107,"Recommended keeping track of family-related stressors.","Started noting when family stuff stresses me and it’s helping me see patterns.",11/12/2025
+84,75,105,"Encouraged healthy sleep habits to improve mood.","New sleep routine is helping my mood a lot.",11/8/2025
+85,76,110,"Suggested mapping out college steps over time.","Made a timeline for college apps and it feels way less overwhelming now.",11/15/2025
+86,77,103,"Encouraged practicing organization and planning skills.","Color-coding everything is weirdly satisfying and keeps me organized.",11/14/2025
+88,79,100,"Encouraged taking short walks to reduce anxiety.",,
+89,80,112,"Recommended identifying one peer for social support.",,
+90,81,104,"Suggested speaking with teacher about workload.","Talked to my biology teacher and got an extension. Huge relief.",11/18/2025
+91,82,101,"Encouraged student to write down academic concerns.","Writing everything down before meetings makes me sound less scattered.",11/19/2025
+92,83,107,"Suggested meeting with counselor again if stress increases.",,
+93,84,100,"Recommended using breathing exercises during frustration.","Breathing exercises kept me from snapping at my mom yesterday.",11/20/2025
+94,85,105,"Encouraged reaching out to family when overwhelmed.","Called my brother when I was crying in the car and he helped.",11/19/2025
+95,86,109,"Suggested tracking daily habits for discussion.","Habit tracker showed I only drink water 2 days a week… working on that.",11/18/2025
+97,88,108,"Suggested talking to trusted adult about emotions.",,
+98,89,102,"Encouraged using grounding techniques during anxiety.",,
+99,90,111,"Suggested student discuss concerns calmly with family.","Used calm voice with parents and we actually talked instead of fighting.",11/19/2025
+100,91,104,"Encouraged practicing stress-relief strategies after school.","Doing yoga after school has been my favorite new thing.",11/20/2025
+102,93,103,"Encouraged student to prepare for conversations with teachers.",,
+103,94,107,"Suggested identifying emotional triggers.","Realized loud noises are a huge trigger so I got earplugs for the cafeteria.",11/20/2025
+104,95,101,"Encouraged student to talk through difficult feelings.","Talking it out here helps more than I thought it would.",11/20/2025
+106,97,105,"Encouraged finding quiet space when overwhelmed.","Found a quiet corner in the library that’s my new safe spot.",11/20/2025
+108,99,112,"Suggested following up if academic concerns continue.",,
+109,100,106,"Encouraged organizing backpack nightly.","Organizing every night means I’m never forgetting my calculator again.",11/20/2025

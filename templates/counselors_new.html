@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Counselor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Add Counselor</h1>
+    </header>
+    <main class="content">
+      <div class="card">
+        <form method="post" class="form-grid">
+          <label>Name</label>
+          <input type="text" name="name" required>
+
+          <label>Type</label>
+          <select name="paid_volunteer">
+            <option value="paid">Paid</option>
+            <option value="volunteer">Volunteer</option>
+          </select>
+
+          <label>Education</label>
+          <input type="text" name="education">
+
+          <label>Experience (years)</label>
+          <input type="number" name="experience">
+
+          <label>Salary (only for paid)</label>
+          <input type="number" name="salary" step="0.01">
+
+          <button type="submit">Create Counselor</button>
+          <a href="{{ url_for('list_counselors') }}" class="button-link secondary">Cancel</a>
+        </form>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
