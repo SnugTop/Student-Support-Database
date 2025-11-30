@@ -49,7 +49,8 @@ CREATE TABLE Counselor (
     name VARCHAR(100) NOT NULL,
     paid_volunteer VARCHAR(10) NOT NULL CHECK (paid_volunteer IN ('paid', 'volunteer')),
     education VARCHAR(50) NOT NULL,
-    experience INT NOT NULL
+    experience INT NOT NULL,
+    head_counselor BOOLEAN NOT NULL DEFAULT 0
 );
 
 -- -----------------------------
@@ -189,6 +190,8 @@ CREATE TABLE Suggestion (
     visit_id INT NOT NULL,
     counselor_id INT NOT NULL,
     details TEXT NOT NULL,
+    student_report TEXT,
+    student_reported_at DATE,
     FOREIGN KEY (visit_id) REFERENCES Visit(visit_id),
     FOREIGN KEY (counselor_id) REFERENCES Counselor(counselor_id)
 );

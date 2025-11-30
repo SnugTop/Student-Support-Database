@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Visit {{ visit.visit_id }} - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Choices.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Edit Visit {{ visit.visit_id }}</h1>
+    </header>
+
+    <main class="content">
+      <div class="card">
+        <form method="post" class="form">
+          <div class="form-row">
+            <label for="student_id">Student</label>
+            <select id="student_id" name="student_id" required>
+              {% for s in students %}
+                <option value="{{ s.student_id }}"
+                  {% if s.student_id == visit.student_id %} selected {% endif %}>
+                  {{ s.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="date">Visit Date (MM/DD/YYYY)</label>
+            <input type="text" id="date" name="date" value="{{ visit.date }}" required>
+          </div>
+
+          <div class="form-row">
+            <label for="mode">Mode</label>
+            <select id="mode" name="mode" required>
+              <option value="in-person" {% if visit.mode == 'in-person' %} selected {% endif %}>In-person</option>
+              <option value="virtual" {% if visit.mode == 'virtual' %} selected {% endif %}>Virtual</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="counselor_ids">Counselors</label>
+            <select id="counselor_ids" name="counselor_ids" multiple required>
+                {% for c in counselors %}
+                <option value="{{ c.counselor_id }}" {% if c.counselor_id in selected_counselors %} selected {% endif %}>
+                    {{ c.name }}
+                </option>
+                {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="button-link">Save Changes</button>
+            <a href="{{ url_for('visit_detail', visit_id=visit.visit_id) }}" class="button-link secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const counselorSelect = document.getElementById('counselor_ids');
+    if (counselorSelect) {
+      new Choices(counselorSelect, { removeItemButton: true, searchResultLimit: 10, placeholderValue: 'Select counselors' });
+    }
+  });
+</script>

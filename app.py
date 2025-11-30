@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
@@ -658,89 +659,185 @@ def update_coursework(coursework_id):
 
 @app.route("/visits")
 def list_visits():
-    search = request.args.get("search", "")
-
     conn = get_db_connection()
-    if search:
-        visits = conn.execute(
-            """
-            SELECT
-              v.visit_id,
-              v.date,
-              v.mode,
-              s.name AS student_name,
-              COUNT(i.issue_id) AS issue_count,
-              COALESCE(MAX(i.severity), 0) AS has_critical_issue
-            FROM Visit v
-            JOIN Student s ON s.student_id = v.student_id
-            LEFT JOIN Issue i ON i.visit_id = v.visit_id
-            WHERE s.name LIKE ?
-               OR CAST(v.visit_id AS TEXT) LIKE ?
-            GROUP BY v.visit_id
-            ORDER BY v.date DESC, v.visit_id DESC
-            """,
-            ("%" + search + "%", "%" + search + "%")
-        ).fetchall()
-    else:
-        visits = conn.execute(
-            """
-            SELECT
-              v.visit_id,
-              v.date,
-              v.mode,
-              s.name AS student_name,
-              COUNT(i.issue_id) AS issue_count,
-              COALESCE(MAX(i.severity), 0) AS has_critical_issue
-            FROM Visit v
-            JOIN Student s ON s.student_id = v.student_id
-            LEFT JOIN Issue i ON i.visit_id = v.visit_id
-            GROUP BY v.visit_id
-            ORDER BY v.date DESC, v.visit_id DESC
-            """
-        ).fetchall()
+    all_students = conn.execute("SELECT student_id, name FROM Student").fetchall()
 
+    # Grab filters
+    selected_students = request.args.getlist("students")
+    mode = request.args.get("mode")
+    issue_op = request.args.get("issue_op")
+    issue_val = request.args.get("issue_val")
+    critical = request.args.get("critical")
+
+    query = """
+        SELECT
+            v.visit_id,
+            v.date,
+            v.mode,
+            s.name AS student_name,
+            COUNT(i.issue_id) AS issue_count,
+            -- Evaluate severity robustly: treat various truthy values as 1
+            COALESCE(MAX(
+                CASE
+                    WHEN i.severity IN (1, '1', 'TRUE', 'True', 'true') THEN 1
+                    ELSE 0
+                END
+            ), 0) AS has_critical_issue
+        FROM Visit v
+        JOIN Student s ON s.student_id = v.student_id
+        LEFT JOIN Issue i ON i.visit_id = v.visit_id
+    """
+    conditions = []
+    params = []
+
+    # Students filter
+    if selected_students:
+        conditions.append("v.student_id IN ({})".format(",".join("?"*len(selected_students))))
+        params.extend(selected_students)
+
+    # Mode filter
+    if mode:
+        conditions.append("v.mode = ?")
+        params.append(mode)
+
+    # Apply WHERE conditions
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+
+    # Grouping needed for issue_count and critical
+    query += " GROUP BY v.visit_id HAVING 1=1"
+
+    # Issue count filter
+    if issue_val:
+        try:
+            issue_val_int = int(issue_val)
+            # validate operator
+            if issue_op in (">", "<", "=", ">=", "<="):
+                query += f" AND COUNT(i.issue_id) {issue_op} ?"
+                params.append(issue_val_int)
+        except ValueError:
+            pass
+
+    # Critical filter (visit is critical if ANY linked issue has severity true)
+    # We use the same CASE expression in HAVING to compare against 0/1.
+    if critical in ("0", "1"):
+        query += """
+         AND COALESCE(MAX(
+             CASE
+                 WHEN i.severity IN (1, '1', 'TRUE', 'True', 'true') THEN 1
+                 ELSE 0
+             END
+         ), 0) = ?
+        """
+        params.append(int(critical))
+
+    query += " ORDER BY v.date DESC, v.visit_id DESC"
+
+    visits = conn.execute(query, params).fetchall()
     conn.close()
-    return render_template("visits.html", visits=visits, search=search)
+    return render_template("visits.html", visits=visits, all_students=all_students,
+                           selected_students=selected_students,
+                           mode=mode, issue_op=issue_op, issue_val=issue_val,
+                           critical=critical)
+
+
 
 
 @app.route("/visits/new", methods=["GET", "POST"])
 def new_visit():
+    conn = get_db_connection()
+    students = conn.execute("SELECT student_id, name FROM Student").fetchall()
+    counselors = conn.execute("SELECT counselor_id, name FROM Counselor").fetchall()
+    categories = conn.execute("SELECT category_id, name FROM Category").fetchall()
+
     if request.method == "POST":
         student_id = request.form["student_id"]
+        counselor_ids = request.form.getlist("counselor_ids")  # list of strings
         date = request.form["date"]
         mode = request.form["mode"]
-        issue_description = request.form["issue_description"]
 
-        severity_flag = 1 if request.form.get("severity") == "1" else 0
+        # Insert visit
+        next_visit_id = conn.execute("SELECT COALESCE(MAX(visit_id),0)+1 FROM Visit").fetchone()[0]
+        conn.execute(
+            "INSERT INTO Visit (visit_id, student_id, date, mode) VALUES (?, ?, ?, ?)",
+            (next_visit_id, student_id, date, mode)
+        )
 
-        conn = get_db_connection()
+        # Handle Issues
+        issues_data = request.form.to_dict(flat=False)
+        issueCount = int(request.form.get("issueCount", 0))
+        critical_issue_added = False  # Flag to check if any issue is critical
 
-        visit_row = conn.execute(
-            "SELECT COALESCE(MAX(visit_id), 0) + 1 AS next_id FROM Visit"
-        ).fetchone()
-        next_visit_id = visit_row["next_id"]
+        for idx in range(issueCount):
+            issue_desc = issues_data[f'issues[{idx}][description]'][0]
+            critical = int(issues_data[f'issues[{idx}][critical]'][0])
+            if critical:
+                critical_issue_added = True  # mark that a critical issue exists
 
-        conn.execute("""
-            INSERT INTO Visit (visit_id, student_id, date, mode)
-            VALUES (?, ?, ?, ?)
-        """, (next_visit_id, student_id, date, mode))
+            next_issue_id = conn.execute("SELECT COALESCE(MAX(issue_id),0)+1 FROM Issue").fetchone()[0]
+            conn.execute(
+                "INSERT INTO Issue (issue_id, visit_id, issue_description, severity) VALUES (?, ?, ?, ?)",
+                (next_issue_id, next_visit_id, issue_desc, critical)
+            )
 
-        issue_row = conn.execute(
-            "SELECT COALESCE(MAX(issue_id), 0) + 1 AS next_id FROM Issue"
-        ).fetchone()
-        next_issue_id = issue_row["next_id"]
+            # Categories
+            selected_categories = issues_data.get(f'issues[{idx}][categories][]', [])
+            for cat_id in selected_categories:
+                conn.execute(
+                    "INSERT INTO Issue_Category (issue_id, category_id) VALUES (?, ?)",
+                    (next_issue_id, cat_id)
+                )
 
-        conn.execute("""
-            INSERT INTO Issue (issue_id, visit_id, issue_description, severity)
-            VALUES (?, ?, ?, ?)
-        """, (next_issue_id, next_visit_id, issue_description, severity_flag))
+            # Issue types & related tables
+            for typ in ['referral', 'coursework', 'financial']:
+                if f'issues[{idx}][{typ}]' in issues_data:
+                    conn.execute(
+                        "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
+                        (next_issue_id, typ.capitalize())
+                    )
+                    if typ == 'referral':
+                        details = issues_data.get(f'issues[{idx}][referral_details]', [''])[0]
+                        next_ref_id = conn.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
+                        conn.execute(
+                            "INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
+                            (next_ref_id, next_issue_id, details)
+                        )
+
+        # If any critical issue, add head counselor to the list (if not already selected)
+        if critical_issue_added:
+            head_counselor = conn.execute(
+                "SELECT counselor_id FROM Counselor WHERE head_counselor = 1 LIMIT 1"
+            ).fetchone()
+            if head_counselor:
+                head_id = str(head_counselor["counselor_id"])
+                if head_id not in counselor_ids:
+                    counselor_ids.append(head_id)  # add head counselor to the list
+
+        # Now insert all counselors for this visit
+        for c_id in counselor_ids:
+            conn.execute(
+                "INSERT INTO Visit_Counselor (visit_id, counselor_id) VALUES (?, ?)",
+                (next_visit_id, c_id)
+            )
+
+        # Handle Suggestions
+        suggestionCount = int(request.form.get("suggestionCount", 0))
+        for idx in range(suggestionCount):
+            sugg_c_id = issues_data[f'suggestions[{idx}][counselor_id]'][0]
+            sugg_details = issues_data[f'suggestions[{idx}][details]'][0]
+            next_sugg_id = conn.execute("SELECT COALESCE(MAX(suggestion_id),0)+1 FROM Suggestion").fetchone()[0]
+            conn.execute(
+                "INSERT INTO Suggestion (suggestion_id, visit_id, counselor_id, details) VALUES (?, ?, ?, ?)",
+                (next_sugg_id, next_visit_id, sugg_c_id, sugg_details)
+            )
 
         conn.commit()
         conn.close()
-
         return redirect(url_for("list_visits"))
 
-    return render_template("visit_form.html")
+    conn.close()
+    return render_template("visit_form.html", students=students, counselors=counselors, categories=categories)
+
 
 
 @app.route("/visits/<int:visit_id>/delete", methods=["POST"])
@@ -756,6 +853,7 @@ def delete_visit(visit_id):
 def visit_detail(visit_id):
     conn = get_db_connection()
 
+    # Fetch visit info
     visit = conn.execute(
         """
         SELECT
@@ -775,21 +873,275 @@ def visit_detail(visit_id):
         conn.close()
         return "Visit not found", 404
 
-    issues = conn.execute(
+    # Fetch counselors
+    counselors = conn.execute(
         """
-        SELECT
-          issue_id,
-          issue_description,
-          severity
-        FROM Issue
-        WHERE visit_id = ?
-        ORDER BY issue_id
+        SELECT c.name
+        FROM Counselor c
+        JOIN Visit_Counselor vc ON vc.counselor_id = c.counselor_id
+        WHERE vc.visit_id = ?
         """,
         (visit_id,)
     ).fetchall()
 
+    # Fetch issues
+    issues_raw = conn.execute(
+        """
+        SELECT
+            i.issue_id,
+            i.issue_description,
+            CASE
+              WHEN i.severity IN (1, '1', 'TRUE', 'True', 'true', 't', 'T') THEN 1
+              ELSE 0
+            END AS severity
+        FROM Issue i
+        WHERE i.visit_id = ?
+        ORDER BY i.issue_id
+        """,
+        (visit_id,)
+    ).fetchall()
+
+    issues = []
+    for i in issues_raw:
+        issue = dict(i)
+
+        # Categories
+        categories = conn.execute(
+            """
+            SELECT c.name
+            FROM Category c
+            JOIN Issue_Category ic ON ic.category_id = c.category_id
+            WHERE ic.issue_id = ?
+            """,
+            (i["issue_id"],)
+        ).fetchall()
+        issue["categories"] = ", ".join([c["name"] for c in categories]) if categories else ""
+
+        # Types
+        types_rows = conn.execute(
+            "SELECT issue_type FROM Issue_Type WHERE issue_id = ?",
+            (i["issue_id"],)
+        ).fetchall()
+        issue_types_list = [t["issue_type"] for t in types_rows] if types_rows else []
+        issue["issue_types_list"] = issue_types_list
+        issue["issue_types"] = ", ".join(issue_types_list) if issue_types_list else ""
+
+        # Referral
+        if "Referral" in issue_types_list:
+            referral_rows = conn.execute(
+                "SELECT referral_id, details FROM Referral WHERE issue_id = ?",
+                (i["issue_id"],)
+            ).fetchall()
+            issue["referrals"] = [dict(r) for r in referral_rows]
+        else:
+            issue["referrals"] = []
+
+        issues.append(issue)
+
+    # Fetch suggestions for this visit
+    suggestions_raw = conn.execute(
+        """
+        SELECT
+            s.suggestion_id,
+            s.counselor_id,
+            s.details,
+            s.student_report,
+            s.student_reported_at,
+            c.name AS counselor_name
+        FROM Suggestion s
+        JOIN Counselor c ON c.counselor_id = s.counselor_id
+        WHERE s.visit_id = ?
+        ORDER BY s.suggestion_id
+        """,
+        (visit_id,)
+    ).fetchall()
+
+    suggestions = [dict(row) for row in suggestions_raw]
+
     conn.close()
-    return render_template("visit_detail.html", visit=visit, issues=issues)
+
+    return render_template(
+        "visit_detail.html",
+        visit=visit,
+        counselors=counselors,
+        issues=issues,
+        suggestions=suggestions
+    )
+
+
+@app.route("/suggestions/<int:suggestion_id>/update", methods=["POST"])
+def update_suggestion(suggestion_id):
+    student_report = request.form.get("student_report")
+    reported_at = request.form.get("student_reported_at")
+
+    conn = get_db_connection()
+    conn.execute(
+        """
+        UPDATE Suggestion
+        SET student_report = ?, student_reported_at = ?
+        WHERE suggestion_id = ?
+        """,
+        (student_report, reported_at, suggestion_id)
+    )
+    conn.commit()
+
+    # fetch visit_id to redirect properly
+    visit_id = conn.execute(
+        "SELECT visit_id FROM Suggestion WHERE suggestion_id = ?",
+        (suggestion_id,)
+    ).fetchone()["visit_id"]
+
+    conn.close()
+    return redirect(url_for("visit_detail", visit_id=visit_id))
+
+
+
+
+
+@app.route("/visits/<int:visit_id>/edit", methods=["GET", "POST"])
+def edit_visit(visit_id):
+    conn = get_db_connection()
+    
+    # Get visit info
+    visit = conn.execute(
+        "SELECT * FROM Visit WHERE visit_id = ?", (visit_id,)
+    ).fetchone()
+    if not visit:
+        conn.close()
+        return "Visit not found", 404
+
+    # Students and counselors for dropdowns
+    students = conn.execute("SELECT student_id, name FROM Student").fetchall()
+    counselors = conn.execute("SELECT counselor_id, name FROM Counselor").fetchall()
+    selected_counselors = [c['counselor_id'] for c in conn.execute(
+        "SELECT counselor_id FROM Visit_Counselor WHERE visit_id = ?", (visit_id,)
+    ).fetchall()]
+
+    if request.method == "POST":
+        student_id = request.form["student_id"]
+        date = request.form["date"]
+        mode = request.form["mode"]
+        counselor_ids = request.form.getlist("counselor_ids")
+
+        # Update visit table
+        conn.execute(
+            "UPDATE Visit SET student_id = ?, date = ?, mode = ? WHERE visit_id = ?",
+            (student_id, date, mode, visit_id)
+        )
+
+        # Update counselors
+        conn.execute("DELETE FROM Visit_Counselor WHERE visit_id = ?", (visit_id,))
+        for c_id in counselor_ids:
+            conn.execute(
+                "INSERT INTO Visit_Counselor (visit_id, counselor_id) VALUES (?, ?)",
+                (visit_id, c_id)
+            )
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for("visit_detail", visit_id=visit_id))
+
+    conn.close()
+    return render_template("edit_visit.html",
+                           visit=visit,
+                           students=students,
+                           counselors=counselors,
+                           selected_counselors=selected_counselors)
+
+
+@app.route("/issues/<int:issue_id>/edit", methods=["GET", "POST"])
+def edit_issue(issue_id):
+    conn = get_db_connection()
+
+    # Fetch issue info
+    issue = conn.execute("SELECT * FROM Issue WHERE issue_id = ?", (issue_id,)).fetchone()
+    if not issue:
+        conn.close()
+        return "Issue not found", 404
+
+    # Fetch categories and types
+    categories = conn.execute("SELECT category_id, name FROM Category").fetchall()
+    selected_categories = [c['category_id'] for c in conn.execute(
+        "SELECT category_id FROM Issue_Category WHERE issue_id = ?", (issue_id,)
+    ).fetchall()]
+
+    types = conn.execute(
+        "SELECT issue_type FROM Issue_Type WHERE issue_id = ?", (issue_id,)
+    ).fetchall()
+    type_list = [t['issue_type'] for t in types]
+
+    referral_details = ''
+    if 'Referral' in type_list:
+        referral = conn.execute(
+            "SELECT details FROM Referral WHERE issue_id = ?", (issue_id,)
+        ).fetchone()
+        if referral:
+            referral_details = referral['details']
+
+    if request.method == "POST":
+        description = request.form["description"]
+        critical = int(request.form["critical"])
+        selected_category_ids = request.form.getlist("categories")
+        issue_types = []
+        referral_flag = request.form.get("referral")
+        coursework_flag = request.form.get("coursework")
+        financial_flag = request.form.get("financial")
+        referral_text = request.form.get("referral_details", "")
+
+        # Update issue
+        conn.execute(
+            "UPDATE Issue SET issue_description = ?, severity = ? WHERE issue_id = ?",
+            (description, critical, issue_id)
+        )
+
+        # Update categories
+        conn.execute("DELETE FROM Issue_Category WHERE issue_id = ?", (issue_id,))
+        for cat_id in selected_category_ids:
+            conn.execute(
+                "INSERT INTO Issue_Category (issue_id, category_id) VALUES (?, ?)",
+                (issue_id, cat_id)
+            )
+
+        # Update issue types
+        conn.execute("DELETE FROM Issue_Type WHERE issue_id = ?", (issue_id,))
+        if referral_flag:
+            conn.execute(
+                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
+                (issue_id, "Referral")
+            )
+            # Update referral table
+            exists = conn.execute("SELECT COUNT(*) FROM Referral WHERE issue_id = ?", (issue_id,)).fetchone()[0]
+            if exists:
+                conn.execute("UPDATE Referral SET details = ? WHERE issue_id = ?", (referral_text, issue_id))
+            else:
+                next_ref_id = conn.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
+                conn.execute("INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
+                             (next_ref_id, issue_id, referral_text))
+        if coursework_flag:
+            conn.execute(
+                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
+                (issue_id, "Coursework")
+            )
+        if financial_flag:
+            conn.execute(
+                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
+                (issue_id, "Financial")
+            )
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for("visit_detail", visit_id=issue["visit_id"]))
+
+    conn.close()
+    return render_template("edit_issue.html",
+                           issue=issue,
+                           categories=categories,
+                           selected_categories=selected_categories,
+                           referral_flag='Referral' in type_list,
+                           coursework_flag='Coursework' in type_list,
+                           financial_flag='Financial' in type_list,
+                           referral_details=referral_details)
+
 
 # ---------- REFERRALS & FOLLOWUPS ----------
 @app.route("/referrals")

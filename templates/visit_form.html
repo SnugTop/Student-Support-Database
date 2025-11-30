@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Add Visit - Student Support Center</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Choices.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 <body>
   <div class="page">
@@ -16,54 +19,147 @@
       <div class="card">
         <p style="margin-top: 0;">
           Need to add or look up a student first?
-          <a href="{{ url_for('list_students') }}" class="button-link secondary">
-            Go to Students
-          </a>
+          <a href="{{ url_for('list_students') }}" class="button-link secondary">Go to Students</a>
         </p>
 
-      <form method="post" class="form">
+        <form method="post" class="form">
+          <!-- Student -->
           <div class="form-row">
-            <label for="student_id">Student ID</label>
-            <input type="number" id="student_id" name="student_id" required>
+            <label for="student_id">Student</label>
+            <input list="students_list" name="student_id" id="student_id" required>
+            <datalist id="students_list">
+              {% for s in students %}
+                <option value="{{ s.student_id }}">{{ s.name }}</option>
+              {% endfor %}
+            </datalist>
           </div>
 
+          <!-- Counselors (multi-select with Choices.js) -->
           <div class="form-row">
-            <label for="date">Visit Date (MM/DD/YYYY)</label>
-            <input type="text" id="date" name="date" placeholder="MM/DD/YYYY" required>
+            <label for="counselor_ids">Counselors</label>
+            <select id="counselor_ids" name="counselor_ids[]" multiple required>
+              {% for c in counselors %}
+                <option value="{{ c.counselor_id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
           </div>
 
+          <!-- Date & Mode -->
+          <div class="form-row">
+            <label for="date">Visit Date</label>
+            <input type="text" name="date" placeholder="MM/DD/YYYY" required>
+          </div>
           <div class="form-row">
             <label for="mode">Mode</label>
-            <select id="mode" name="mode" required>
-              <option value="in-person">In-person</option>
+            <select name="mode" required>
+              <option value="in-person">In-Person</option>
               <option value="virtual">Virtual</option>
             </select>
           </div>
 
-          <hr style="margin: 1.5rem 0;">
+          <hr>
 
-          <h3>Issue Details</h3>
+          <!-- Issues -->
+          <h3>Issues</h3>
+          <div id="issues-container"></div>
+          <button type="button" onclick="addIssue()">+ Add Issue</button>
 
-          <div class="form-row">
-            <label for="issue_description">Issue Description</label>
-            <textarea id="issue_description" name="issue_description"
-                      placeholder="Describe the student's issue..."
-                      required></textarea>
-          </div>
+          <hr>
 
-          <div class="form-row">
-            <label for="severity">Severity (1–10)</label>
-            <input type="number" id="severity" name="severity" min="1" max="10" required>
-          </div>
+          <!-- Suggestions -->
+          <h3>Suggestions</h3>
+          <div id="suggestions-container"></div>
+          <button type="button" onclick="addSuggestion()">+ Add Suggestion</button>
 
           <div class="form-actions">
             <button type="submit" class="button-link">Save Visit</button>
             <a href="{{ url_for('list_visits') }}" class="button-link secondary">Cancel</a>
           </div>
-        </form>
 
+          <input type="hidden" name="issueCount" id="issueCount" value="0">
+          <input type="hidden" name="suggestionCount" id="suggestionCount" value="0">
+        </form>
       </div>
     </main>
   </div>
+
+<script>
+let issueCount = 0;
+let suggestionCount = 0;
+
+function addIssue() {
+  const container = document.getElementById("issues-container");
+  const div = document.createElement("div");
+  div.classList.add("issue-block");
+
+  // Create select options for categories
+  let categoryOptions = `{% for cat in categories %}<option value="{{ cat.category_id }}">{{ cat.name }}</option>{% endfor %}`;
+
+  div.innerHTML = `
+    <h4>Issue ${issueCount+1}</h4>
+    <label>Description</label>
+    <textarea name="issues[${issueCount}][description]" required></textarea>
+
+    <label>Critical?</label>
+    <select name="issues[${issueCount}][critical]" required>
+      <option value="1">True</option>
+      <option value="0">False</option>
+    </select>
+
+    <label>Categories</label>
+    <select name="issues[${issueCount}][categories][]" multiple required>
+      ${categoryOptions}
+    </select>
+
+    <label><input type="checkbox" name="issues[${issueCount}][referral]" onchange="toggleReferralDetails(this)"> Referral</label>
+    <input type="text" name="issues[${issueCount}][referral_details]" placeholder="Referral details" style="display:none;">
+
+    <label><input type="checkbox" name="issues[${issueCount}][coursework]"> Coursework</label>
+    <label><input type="checkbox" name="issues[${issueCount}][financial]"> Financial</label>
+  `;
+  container.appendChild(div);
+
+  // Initialize Choices.js on new categories select
+  const lastSelect = div.querySelector('select[name$="[categories][]"]');
+  new Choices(lastSelect, { removeItemButton: true, searchResultLimit: 10, placeholderValue: 'Select categories' });
+
+  issueCount++;
+  document.getElementById("issueCount").value = issueCount;
+}
+
+function toggleReferralDetails(checkbox) {
+  checkbox.parentNode.querySelector('[name$="[referral_details]"]').style.display =
+    checkbox.checked ? 'block' : 'none';
+}
+
+function addSuggestion() {
+  const container = document.getElementById("suggestions-container");
+  const div = document.createElement("div");
+  div.classList.add("suggestion-block");
+
+  let counselorOptions = `{% for c in counselors %}<option value="{{ c.counselor_id }}">{{ c.name }}</option>{% endfor %}`;
+
+  div.innerHTML = `
+    <h4>Suggestion ${suggestionCount+1}</h4>
+    <label>Counselor</label>
+    <select name="suggestions[${suggestionCount}][counselor_id]" required>
+      ${counselorOptions}
+    </select>
+    <label>Details</label>
+    <textarea name="suggestions[${suggestionCount}][details]" required></textarea>
+  `;
+  container.appendChild(div);
+  suggestionCount++;
+  document.getElementById("suggestionCount").value = suggestionCount;
+}
+
+// Initialize Choices.js on visit counselors multi-select
+document.addEventListener('DOMContentLoaded', function () {
+  const counselorSelect = document.getElementById('counselor_ids');
+  if (counselorSelect) {
+    new Choices(counselorSelect, { removeItemButton: true, searchResultLimit: 10, placeholderValue: 'Select counselors' });
+  }
+});
+</script>
 </body>
 </html>

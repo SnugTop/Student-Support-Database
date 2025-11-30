@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Issue {{ issue.issue_id }} - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    function toggleReferralDetails() {
+      const referralCheckbox = document.getElementById("referral");
+      const referralDetails = document.getElementById("referral_details_row");
+      referralDetails.style.display = referralCheckbox.checked ? "block" : "none";
+    }
+    window.addEventListener("DOMContentLoaded", toggleReferralDetails);
+  </script>
+  <!-- Choices.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Edit Issue {{ issue.issue_id }}</h1>
+    </header>
+
+    <main class="content">
+      <div class="card">
+        <form method="post" class="form">
+          <div class="form-row">
+            <label for="description">Issue Description</label>
+            <textarea id="description" name="description" required>{{ issue.issue_description }}</textarea>
+          </div>
+
+          <div class="form-row">
+            <label for="critical">Critical?</label>
+            <select id="critical" name="critical" required>
+              <option value="1" {% if issue.severity == 1 %}selected{% endif %}>Yes</option>
+              <option value="0" {% if issue.severity == 0 %}selected{% endif %}>No</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="categories">Categories (select at least one)</label>
+            <select id="categories" name="categories" multiple required>
+                {% for c in categories %}
+                <option value="{{ c.category_id }}" {% if c.category_id in selected_categories %} selected {% endif %}>
+                    {{ c.name }}
+                </option>
+                {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>Issue Types</label>
+            <label><input type="checkbox" id="referral" name="referral" value="1"
+              {% if referral_flag %} checked {% endif %}
+              onclick="toggleReferralDetails()"> Referral</label>
+
+            <label><input type="checkbox" name="coursework" value="1"
+              {% if coursework_flag %} checked {% endif %}> Coursework</label>
+
+            <label><input type="checkbox" name="financial" value="1"
+              {% if financial_flag %} checked {% endif %}> Financial</label>
+          </div>
+
+          <div class="form-row" id="referral_details_row" style="display:none;">
+            <label for="referral_details">Referral Details</label>
+            <textarea id="referral_details" name="referral_details">{{ referral_details }}</textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="button-link">Save Issue</button>
+            <a href="{{ url_for('visit_detail', visit_id=issue.visit_id) }}" class="button-link secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const categorySelect = document.getElementById('categories');
+    if (categorySelect) {
+      new Choices(categorySelect, { removeItemButton: true, searchResultLimit: 10, placeholderValue: 'Select categories' });
+    }
+  });
+</script>
