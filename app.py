@@ -746,97 +746,120 @@ def list_visits():
 @app.route("/visits/new", methods=["GET", "POST"])
 def new_visit():
     conn = get_db_connection()
-    students = conn.execute("SELECT student_id, name FROM Student").fetchall()
-    counselors = conn.execute("SELECT counselor_id, name FROM Counselor").fetchall()
-    categories = conn.execute("SELECT category_id, name FROM Category").fetchall()
+    cursor = conn.cursor()
+
+    students = cursor.execute("SELECT student_id, name FROM Student ORDER BY name").fetchall()
+    counselors = cursor.execute("SELECT counselor_id, name FROM Counselor ORDER BY name").fetchall()
+    categories = cursor.execute("SELECT category_id, name FROM Category ORDER BY name").fetchall()
+    courses = cursor.execute("SELECT course_id, course_name FROM Course ORDER BY course_id").fetchall()
+
+    HEAD_COUNSELOR_ID = 113  # hardcoded
 
     if request.method == "POST":
-        student_id = request.form["student_id"]
-        counselor_ids = request.form.getlist("counselor_ids")  # list of strings
-        date = request.form["date"]
-        mode = request.form["mode"]
+        app.logger.info("Form data: %s", request.form.to_dict(flat=False))
 
-        # Insert visit
-        next_visit_id = conn.execute("SELECT COALESCE(MAX(visit_id),0)+1 FROM Visit").fetchone()[0]
-        conn.execute(
+        student_id = request.form.get("student_id", "").strip()
+        date = request.form.get("date", "").strip()
+        mode = request.form.get("mode", "").strip()
+
+        # Collect counselor IDs from form
+        form_values = request.form.getlist("counselor_ids") + request.form.getlist("counselor_ids[]")
+        selected_counselor_ids = set()
+        for v in form_values:
+            try:
+                selected_counselor_ids.add(int(v))
+            except ValueError:
+                continue
+
+        # Check if any issue is critical
+        issueCount = int(request.form.get("issueCount", 0))
+        critical_issue_added = False
+        for i in range(issueCount):
+            if request.form.get(f"issues[{i}][critical]") == "1":
+                critical_issue_added = True
+                break
+
+        if critical_issue_added:
+            selected_counselor_ids.add(HEAD_COUNSELOR_ID)
+            app.logger.info("Critical issue detected, added counselor 113")
+
+        # Insert Visit
+        next_visit_id = cursor.execute("SELECT COALESCE(MAX(visit_id),0)+1 FROM Visit").fetchone()[0]
+        cursor.execute(
             "INSERT INTO Visit (visit_id, student_id, date, mode) VALUES (?, ?, ?, ?)",
             (next_visit_id, student_id, date, mode)
         )
 
-        # Handle Issues
-        issues_data = request.form.to_dict(flat=False)
-        issueCount = int(request.form.get("issueCount", 0))
-        critical_issue_added = False  # Flag to check if any issue is critical
+        # Insert Visit_Counselor
+        for cid in sorted(selected_counselor_ids):
+            cursor.execute(
+                "INSERT OR IGNORE INTO Visit_Counselor (visit_id, counselor_id) VALUES (?, ?)",
+                (next_visit_id, cid)
+            )
 
-        for idx in range(issueCount):
-            issue_desc = issues_data[f'issues[{idx}][description]'][0]
-            critical = int(issues_data[f'issues[{idx}][critical]'][0])
-            if critical:
-                critical_issue_added = True  # mark that a critical issue exists
-
-            next_issue_id = conn.execute("SELECT COALESCE(MAX(issue_id),0)+1 FROM Issue").fetchone()[0]
-            conn.execute(
+        # Process issues
+        for i in range(issueCount):
+            desc = request.form.get(f"issues[{i}][description]", "").strip()
+            if not desc:
+                continue
+            critical = request.form.get(f"issues[{i}][critical]") == "1"
+            next_issue_id = cursor.execute("SELECT COALESCE(MAX(issue_id),0)+1 FROM Issue").fetchone()[0]
+            cursor.execute(
                 "INSERT INTO Issue (issue_id, visit_id, issue_description, severity) VALUES (?, ?, ?, ?)",
-                (next_issue_id, next_visit_id, issue_desc, critical)
+                (next_issue_id, next_visit_id, desc, int(critical))
             )
-
-            # Categories
-            selected_categories = issues_data.get(f'issues[{idx}][categories][]', [])
-            for cat_id in selected_categories:
-                conn.execute(
-                    "INSERT INTO Issue_Category (issue_id, category_id) VALUES (?, ?)",
-                    (next_issue_id, cat_id)
-                )
-
-            # Issue types & related tables
-            for typ in ['referral', 'coursework', 'financial']:
-                if f'issues[{idx}][{typ}]' in issues_data:
-                    conn.execute(
-                        "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
-                        (next_issue_id, typ.capitalize())
-                    )
-                    if typ == 'referral':
-                        details = issues_data.get(f'issues[{idx}][referral_details]', [''])[0]
-                        next_ref_id = conn.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
-                        conn.execute(
-                            "INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
-                            (next_ref_id, next_issue_id, details)
+            for cat_id in request.form.getlist(f"issues[{i}][categories][]"):
+                if cat_id.strip():
+                    try:
+                        cursor.execute(
+                            "INSERT INTO Issue_Category (issue_id, category_id) VALUES (?, ?)",
+                            (next_issue_id, int(cat_id))
                         )
+                    except Exception:
+                        pass
+            # Referral/Coursework/Financial types
+            if f"issues[{i}][referral]" in request.form:
+                cursor.execute("INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Referral')", (next_issue_id,))
+                details = request.form.get(f"issues[{i}][referral_details]", "")
+                next_ref_id = cursor.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
+                cursor.execute("INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
+                               (next_ref_id, next_issue_id, details))
+            if f"issues[{i}][coursework]" in request.form:
+                cursor.execute("INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Coursework')", (next_issue_id,))
+            if f"issues[{i}][financial]" in request.form:
+                cursor.execute("INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Financial')", (next_issue_id,))
 
-        # If any critical issue, add head counselor to the list (if not already selected)
-        if critical_issue_added:
-            head_counselor = conn.execute(
-                "SELECT counselor_id FROM Counselor WHERE head_counselor = 1 LIMIT 1"
-            ).fetchone()
-            if head_counselor:
-                head_id = str(head_counselor["counselor_id"])
-                if head_id not in counselor_ids:
-                    counselor_ids.append(head_id)  # add head counselor to the list
-
-        # Now insert all counselors for this visit
-        for c_id in counselor_ids:
-            conn.execute(
-                "INSERT INTO Visit_Counselor (visit_id, counselor_id) VALUES (?, ?)",
-                (next_visit_id, c_id)
-            )
-
-        # Handle Suggestions
+        # Suggestions
         suggestionCount = int(request.form.get("suggestionCount", 0))
-        for idx in range(suggestionCount):
-            sugg_c_id = issues_data[f'suggestions[{idx}][counselor_id]'][0]
-            sugg_details = issues_data[f'suggestions[{idx}][details]'][0]
-            next_sugg_id = conn.execute("SELECT COALESCE(MAX(suggestion_id),0)+1 FROM Suggestion").fetchone()[0]
-            conn.execute(
+        for i in range(suggestionCount):
+            raw_cid = request.form.get(f"suggestions[{i}][counselor_id]")
+            details = request.form.get(f"suggestions[{i}][details]", "").strip()
+            if not raw_cid or not details:
+                continue
+            try:
+                c_id = int(raw_cid)
+            except ValueError:
+                continue
+            next_sugg_id = cursor.execute("SELECT COALESCE(MAX(suggestion_id),0)+1 FROM Suggestion").fetchone()[0]
+            cursor.execute(
                 "INSERT INTO Suggestion (suggestion_id, visit_id, counselor_id, details) VALUES (?, ?, ?, ?)",
-                (next_sugg_id, next_visit_id, sugg_c_id, sugg_details)
+                (next_sugg_id, next_visit_id, c_id, details)
             )
 
         conn.commit()
+        app.logger.info("Visit %s saved with counselors %s", next_visit_id, sorted(selected_counselor_ids))
         conn.close()
         return redirect(url_for("list_visits"))
 
     conn.close()
-    return render_template("visit_form.html", students=students, counselors=counselors, categories=categories)
+    return render_template(
+        "visit_form.html",
+        students=students,
+        counselors=counselors,
+        categories=categories,
+        courses=courses
+    )
+
 
 
 
