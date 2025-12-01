@@ -1372,7 +1372,7 @@ def reports_index():
         {"id": 12, "title": "12. Counselors on payroll vs volunteers"},
         {"id": 13, "title": "13. Min / Max / Avg salary of paid counselors"},
         {"id": 14, "title": "14. Students with multiple issues"},
-        {"id": 15, "title": "15. Students with bullying-related issues"},
+        {"id": 15, "title": "15. Students with {keyword}-related issues"},
         {"id": 16, "title": "16. Students with health issues per ZIP code"},
         {"id": 17, "title": "17. Courses with academic difficulty"},
     ]
@@ -1731,25 +1731,33 @@ def report_detail(report_id):
 
         # ---------- 15. Students who reported a certain issue (e.g. bullying) ----------
         elif report_id == 15:
-            title = "15. Students with bullying-related issues"
+            title = "15. Students with a specific issue keyword"
             description = (
-                "Shows students who have an issue description containing the word 'bullying'."
+                "Enter a keyword below to find all students who reported issues containing that word."
             )
-            sql = """
-                SELECT DISTINCT
-                    s.student_id,
-                    s.name,
-                    i.issue_id,
-                    i.issue_description
-                FROM Issue i
-                JOIN Visit v ON v.visit_id = i.visit_id
-                JOIN Student s ON s.student_id = v.student_id
-                WHERE i.issue_description LIKE '%bullying%'
-                ORDER BY s.name
-            """
-            cur = conn.execute(sql)
-            rows = cur.fetchall()
-            headers = [col[0] for col in cur.description]
+
+            keyword = request.args.get("keyword", "").strip()
+            if keyword:
+                like_pattern = f"%{keyword}%"
+                sql = """
+                    SELECT DISTINCT
+                        s.student_id,
+                        s.name,
+                        i.issue_id,
+                        i.issue_description
+                    FROM Issue i
+                    JOIN Visit v ON v.visit_id = i.visit_id
+                    JOIN Student s ON s.student_id = v.student_id
+                    WHERE i.issue_description LIKE ?
+                    ORDER BY s.name
+                """
+                cur = conn.execute(sql, (like_pattern,))
+                rows = cur.fetchall()
+                headers = [col[0] for col in cur.description]
+            else:
+                rows = []
+                headers = []
+
 
         # ---------- 16. Number of students with health issues per ZIP code ----------
         elif report_id == 16:

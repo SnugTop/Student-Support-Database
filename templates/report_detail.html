@@ -15,6 +15,16 @@
     <main class="content">
       <div class="card hero">
         <h2>{{ title }}</h2>
+         {% if report_id == 15 %}
+        <form method="get" action="{{ url_for('report_detail', report_id=15) }}" class="search-form">
+            <input type="text"
+               name="keyword"
+               placeholder="Enter keyword (example: anxiety)"
+               value="{{ request.args.get('keyword', '') }}"
+               class="search-input">
+            <button type="submit" class="button-link">Search</button>
+        </form>
+        {% endif %}
         {% if description %}
           <p>{{ description }}</p>
         {% endif %}
