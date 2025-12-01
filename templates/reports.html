@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reports - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>Reports & Analytics</h1>
+    </header>
+
+    <main class="content">
+      <div class="card hero">
+        <h2>Available Reports</h2>
+        <p>Select a report to run against the database.</p>
+        <p style="margin-top: 0.5rem;">
+          <a href="{{ url_for('home') }}" class="button-link secondary">
+            ← Back to Dashboard
+          </a>
+        </p>
+      </div>
+
+      <div class="card">
+        <ul class="report-list">
+          {% for r in reports %}
+            <li style="margin-bottom: 0.5rem;">
+              <a href="{{ url_for('report_detail', report_id=r.id) }}"
+                 class="button-link">
+                {{ r.title }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title or "Report" }} - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="logo-circle">SSC</div>
+      <h1>{{ title }}</h1>
+    </header>
+
+    <main class="content">
+      <div class="card hero">
+        <h2>{{ title }}</h2>
+         {% if report_id == 15 %}
+        <form method="get" action="{{ url_for('report_detail', report_id=15) }}" class="search-form">
+            <input type="text"
+               name="keyword"
+               placeholder="Enter keyword (example: anxiety)"
+               value="{{ request.args.get('keyword', '') }}"
+               class="search-input">
+            <button type="submit" class="button-link">Search</button>
+        </form>
+        {% endif %}
+        {% if description %}
+          <p>{{ description }}</p>
+        {% endif %}
+        <p style="margin-top: 0.5rem;">
+          <a href="{{ url_for('reports_index') }}" class="button-link secondary">
+            ← Back to Reports
+          </a>
+          <a href="{{ url_for('home') }}" class="button-link secondary">
+            ← Back to Dashboard
+          </a>
+        </p>
+      </div>
+
+      {% if error %}
+        <div class="card">
+          <p style="color: #c0392b;">{{ error }}</p>
+        </div>
+      {% elif rows and headers %}
+        <div class="card">
+          <h3>Results</h3>
+          <table class="table">
+            <thead>
+              <tr>
+                {% for h in headers %}
+                  <th>{{ h }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  {% for h in headers %}
+                    <td>{{ row[h] }}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card">
+          <p>No data found for this report.</p>
+        </div>
+      {% endif %}
+    </main>
+  </div>
+</body>
+</html>

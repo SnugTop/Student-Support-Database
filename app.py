@@ -251,8 +251,6 @@ def view_student(student_id):
     )
 
 
-
-
 @app.route("/students/<int:student_id>/delete", methods=["POST"])
 def delete_student(student_id):
     conn = get_db_connection()
@@ -1344,6 +1342,489 @@ def remove_course(student_id, course_id):
     conn.close()
     return redirect(url_for("view_student", student_id=student_id))
 
+
+# ---------- REPORTS / ANALYTICS ----------
+
+@app.route("/reports")
+def reports_index():
+    """
+    Landing page that lists all available reports. each report is a link to a new page that displays the
+    report corresponding to a specific requirement in the assignment.
+    """
+    reports = [
+        {"id": 1,  "title": "1. Counselor data (directory)"},
+        {"id": 2,  "title": "2. Student data (directory)"},
+        {"id": 3,  "title": "3. Demographics: students by country"},
+        {"id": 4,  "title": "4. Types of issues & categories"},
+        {"id": 5,  "title": "5. Visit frequency by student"},
+        {"id": 6,  "title": "6. Number of students per counselor"},
+        {"id": 7,  "title": "7. Number of students per issue category"},
+        {"id": 8,  "title": "8. Counts of referrals / financial / coursework help"},
+        {"id": 9,  "title": "9. Students flagged as critical"},
+        {"id": 10, "title": "10. Students who have not reported back after support"},
+        {"id": 11, "title": "11. Counselors who have open follow ups"},
+        {"id": 12, "title": "12. Counselors on payroll vs volunteers"},
+        {"id": 13, "title": "13. Min / Max / Avg salary of paid counselors"},
+        {"id": 14, "title": "14. Students with multiple issues"},
+        {"id": 15, "title": "15. Students with {keyword}-related issues"},
+        {"id": 16, "title": "16. Students with health issues per ZIP code"},
+        {"id": 17, "title": "17. Courses with academic difficulty"},
+    ]
+    return render_template("reports.html", reports=reports)
+
+
+@app.route("/reports/<int:report_id>")
+def report_detail(report_id):
+    """
+    Runs a specific pre-written SQL report that corresponds to one of the requirements from the assignment
+    and shows the result in a table.
+    """
+    title = ""
+    description = ""
+    headers = []
+    rows = []
+    error = None
+
+    conn = get_db_connection()
+    try:
+        # ---------- 1. Counselor data ----------
+        if report_id == 1:
+            title = "1. Counselor data (directory)"
+            description = "Lists all counselors with their type, education, and experience."
+            sql = """
+                SELECT
+                    counselor_id,
+                    name,
+                    paid_volunteer,
+                    education,
+                    experience
+                FROM Counselor
+                ORDER BY name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 2. Student data ----------
+        elif report_id == 2:
+            title = "2. Student data (directory)"
+            description = "Lists all students with basic demographics."
+            sql = """
+                SELECT
+                    student_id,
+                    name,
+                    dob,
+                    country_of_birth,
+                    gender,
+                    consent,
+                    zip_code
+                FROM Student
+                ORDER BY name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 3. Demographics: which country is most common ----------
+        elif report_id == 3:
+            title = "3. Student demographics by country"
+            description = (
+                "Counts how many students come from each country of birth, "
+                "sorted by the most common country."
+            )
+            sql = """
+                SELECT
+                    country_of_birth AS Country,
+                    COUNT(*) AS num_students
+                FROM Student
+                GROUP BY country_of_birth
+                ORDER BY num_students DESC, country_of_birth
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 4. Different types of issues / concerns ----------
+        elif report_id == 4:
+            title = "4. Types of issues & categories"
+            description = (
+                "Shows counts of issues by issue type and by category "
+                "in a single combined table."
+            )
+            sql = """
+                SELECT
+                    'Issue type' AS dimension_kind,
+                    it.issue_type AS dimension,
+                    COUNT(*) AS num_issues
+                FROM Issue_Type it
+                GROUP BY it.issue_type
+
+                UNION ALL
+
+                SELECT
+                    'Category' AS dimension_kind,
+                    c.name AS dimension,
+                    COUNT(*) AS num_issues
+                FROM Category c
+                JOIN Issue_Category ic ON ic.category_id = c.category_id
+                GROUP BY c.category_id, c.name
+
+                ORDER BY dimension_kind, num_issues DESC, dimension
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 5. Frequency of visit by each student ----------
+        elif report_id == 5:
+            title = "5. Visit frequency by student"
+            description = "Shows how many counseling visits each student has had."
+            sql = """
+                SELECT
+                    s.student_id,
+                    s.name,
+                    COUNT(v.visit_id) AS num_visits
+                FROM Student s
+                LEFT JOIN Visit v ON v.student_id = s.student_id
+                GROUP BY s.student_id, s.name
+                ORDER BY num_visits DESC, s.name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 6. Number of students per counselor ----------
+        elif report_id == 6:
+            title = "6. Number of students per counselor"
+            description = "For each counselor, shows how many distinct students they have seen."
+            sql = """
+                SELECT
+                    c.counselor_id,
+                    c.name,
+                    COUNT(DISTINCT v.student_id) AS num_students
+                FROM Counselor c
+                LEFT JOIN Visit_Counselor vc
+                    ON vc.counselor_id = c.counselor_id
+                LEFT JOIN Visit v
+                    ON v.visit_id = vc.visit_id
+                GROUP BY c.counselor_id, c.name
+                ORDER BY num_students DESC, c.name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 7. Number of students for each category of problems ----------
+        elif report_id == 7:
+            title = "7. Number of students per issue category"
+            description = (
+                "Counts how many distinct students have at least one issue "
+                "in each problem category."
+            )
+            sql = """
+                SELECT
+                    cat.category_id,
+                    cat.name AS category_name,
+                    COUNT(DISTINCT v.student_id) AS num_students
+                FROM Category cat
+                LEFT JOIN Issue_Category ic
+                    ON ic.category_id = cat.category_id
+                LEFT JOIN Issue i
+                    ON i.issue_id = ic.issue_id
+                LEFT JOIN Visit v
+                    ON v.visit_id = i.visit_id
+                GROUP BY cat.category_id, cat.name
+                ORDER BY num_students DESC, cat.name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 8. Number of times referred to healthcare / jobs / dean, etc. ----------
+        elif report_id == 8:
+            title = "8. Counts of referrals / financial / coursework help"
+            description = (
+                "Shows how many records there are for healthcare referrals, "
+                "job/financial help, and coursework/dean/tutor support."
+            )
+            sql = """
+                SELECT 'Healthcare referrals' AS type, COUNT(*) AS num_records
+                FROM Referral
+
+                UNION ALL
+
+                SELECT 'Job / financial help' AS type, COUNT(*) AS num_records
+                FROM Financial
+
+                UNION ALL
+
+                SELECT 'Coursework / dean / tutor support' AS type, COUNT(*) AS num_records
+                FROM Coursework
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 9. Students flagged as critical ----------
+        elif report_id == 9:
+            title = "9. Students flagged as critical (severity = TRUE)"
+            description = (
+                "Lists students who have at least one issue marked as critical "
+                "(severity marked as TRUE / 1 / similar)."
+            )
+            sql = """
+                SELECT DISTINCT
+                    s.student_id,
+                    s.name,
+                    s.zip_code
+                FROM Student s
+                JOIN Visit v ON v.student_id = s.student_id
+                JOIN Issue i ON i.visit_id = v.visit_id
+                WHERE i.severity IN (1, '1', 'TRUE', 'True', 'true', 't', 'T')
+                ORDER BY s.name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 10. Students who did not report back after receiving advice ----------
+        elif report_id == 10:
+            title = "10. Students who have not reported back after support"
+            description = (
+                "Shows students who have outstanding items (suggestions, referrals, "
+                "financial, or coursework) with no student_reported_at date."
+            )
+            sql = """
+                SELECT DISTINCT
+                    s.student_id,
+                    s.name,
+                    src.source
+                FROM (
+                    -- Suggestions
+                    SELECT
+                        v.student_id,
+                        'Suggestion' AS source,
+                        sug.student_reported_at AS reported_at
+                    FROM Suggestion sug
+                    JOIN Visit v ON v.visit_id = sug.visit_id
+
+                    UNION ALL
+
+                    -- Referrals
+                    SELECT
+                        v.student_id,
+                        'Referral' AS source,
+                        r.student_reported_at AS reported_at
+                    FROM Referral r
+                    JOIN Issue i ON i.issue_id = r.issue_id
+                    JOIN Visit v ON v.visit_id = i.visit_id
+
+                    UNION ALL
+
+                    -- Financial
+                    SELECT
+                        v.student_id,
+                        'Financial' AS source,
+                        f.student_reported_at AS reported_at
+                    FROM Financial f
+                    JOIN Issue i ON i.issue_id = f.issue_id
+                    JOIN Visit v ON v.visit_id = i.visit_id
+
+                    UNION ALL
+
+                    -- Coursework
+                    SELECT
+                        v.student_id,
+                        'Coursework' AS source,
+                        cw.student_reported_at AS reported_at
+                    FROM Coursework cw
+                    JOIN Issue i ON i.issue_id = cw.issue_id
+                    JOIN Visit v ON v.visit_id = i.visit_id
+                ) src
+                JOIN Student s ON s.student_id = src.student_id
+                WHERE src.reported_at IS NULL
+                   OR src.reported_at = ''
+                ORDER BY s.name, src.source
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 11. Counselors who never followed up with any student ----------
+        elif report_id == 11:
+            title = "11. Counselors With Open Follow-Ups"
+            description = "Shows counselors that have no records in the Followup table."
+            sql = """
+                SELECT DISTINCT
+                    c.counselor_id,
+                    c.name,
+                    c.paid_volunteer
+                FROM Counselor c
+                JOIN Followup f ON f.counselor_id = c.counselor_id
+                WHERE f.complete IS NULL
+                   OR f.complete = ''
+                   OR f.complete = 0
+                ORDER BY c.name;
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 12. Counselors on payroll vs volunteers ----------
+        elif report_id == 12:
+            title = "12. Counselors on payroll vs volunteers"
+            description = "Shows each counselor's role and also the counts by type."
+
+            sql_list = """
+                SELECT
+                    counselor_id,
+                    name,
+                    paid_volunteer AS role
+                FROM Counselor
+                ORDER BY role, name
+            """
+            cur = conn.execute(sql_list)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+            sql_counts = """
+                SELECT
+                    paid_volunteer AS role,
+                    COUNT(*) AS num_counselors
+                FROM Counselor
+                GROUP BY paid_volunteer
+                ORDER BY role
+            """
+            cur2 = conn.execute(sql_counts)
+            rows2 = cur2.fetchall()
+            headers2 = [col[0] for col in cur2.description]
+
+        # ---------- 13. Min, max, avg salary of paid counselors ----------
+        elif report_id == 13:
+            title = "13. Min / Max / Avg salary of paid counselors"
+            description = "Summary statistics for counselor salaries."
+            sql = """
+                SELECT
+                    MIN(salary) AS min_salary,
+                    MAX(salary) AS max_salary,
+                    AVG(salary) AS avg_salary
+                FROM Counselor_Salary
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 14. Students who have multiple issues ----------
+        elif report_id == 14:
+            title = "14. Students with multiple issues"
+            description = (
+                "Lists students who have 2 or more distinct issues recorded."
+            )
+            sql = """
+                SELECT
+                    s.student_id,
+                    s.name,
+                    COUNT(DISTINCT i.issue_id) AS num_issues
+                FROM Student s
+                JOIN Visit v ON v.student_id = s.student_id
+                JOIN Issue i ON i.visit_id = v.visit_id
+                GROUP BY s.student_id, s.name
+                HAVING COUNT(DISTINCT i.issue_id) >= 2
+                ORDER BY num_issues DESC, s.name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 15. Students who reported a certain issue (e.g. bullying) ----------
+        elif report_id == 15:
+            title = "15. Students with a specific issue keyword"
+            description = (
+                "Enter a keyword below to find all students who reported issues containing that word."
+            )
+
+            keyword = request.args.get("keyword", "").strip()
+            if keyword:
+                like_pattern = f"%{keyword}%"
+                sql = """
+                    SELECT DISTINCT
+                        s.student_id,
+                        s.name,
+                        i.issue_id,
+                        i.issue_description
+                    FROM Issue i
+                    JOIN Visit v ON v.visit_id = i.visit_id
+                    JOIN Student s ON s.student_id = v.student_id
+                    WHERE i.issue_description LIKE ?
+                    ORDER BY s.name
+                """
+                cur = conn.execute(sql, (like_pattern,))
+                rows = cur.fetchall()
+                headers = [col[0] for col in cur.description]
+            else:
+                rows = []
+                headers = []
+
+
+        # ---------- 16. Number of students with health issues per ZIP code ----------
+        elif report_id == 16:
+            title = "16. Students with health issues per ZIP code"
+            description = (
+                "Counts how many distinct students with at least one diagnosis live in each ZIP code."
+            )
+            sql = """
+                SELECT
+                    s.zip_code,
+                    COUNT(DISTINCT s.student_id) AS num_students_with_health_issues
+                FROM Diagnosis d
+                JOIN Student s ON s.student_id = d.student_id
+                GROUP BY s.zip_code
+                ORDER BY num_students_with_health_issues DESC, s.zip_code
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        # ---------- 17. Courses & number of students with academic difficulty ----------
+        elif report_id == 17:
+            title = "17. Courses with academic difficulty"
+            description = (
+                "Shows courses and how many distinct students have coursework-related issues in those courses."
+            )
+            sql = """
+                SELECT
+                    c.course_id,
+                    c.course_name,
+                    COUNT(DISTINCT s.student_id) AS num_students_with_difficulty
+                FROM Coursework cw
+                JOIN Course c ON c.course_id = cw.course_id
+                JOIN Issue i ON i.issue_id = cw.issue_id
+                JOIN Visit v ON v.visit_id = i.visit_id
+                JOIN Student s ON s.student_id = v.student_id
+                GROUP BY c.course_id, c.course_name
+                ORDER BY num_students_with_difficulty DESC, c.course_name
+            """
+            cur = conn.execute(sql)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+        else:
+            error = f"Unknown report id: {report_id}"
+
+    except sqlite3.Error as e:
+        error = f"SQL error while running report {report_id}: {e}"
+    finally:
+        conn.close()
+
+    return render_template(
+        "report_detail.html",
+        report_id=report_id,
+        title=title,
+        description=description,
+        headers=headers,
+        rows=rows,
+        error=error,
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
