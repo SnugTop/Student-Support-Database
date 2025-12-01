@@ -1208,6 +1208,7 @@ def sql_console():
 @app.route("/referrals")
 def list_referrals():
     conn = get_db_connection()
+
     referrals = conn.execute(
         """
         SELECT
@@ -1230,15 +1231,16 @@ def list_referrals():
           f.date,
           f.notes,
           f.complete,
-          s.name AS student_name
+          s.name AS student_name,
+          c.name AS counselor_name
         FROM Followup f
-        JOIN Issue i ON i.issue_id = f.issue_id
-        JOIN Counselor c ON c.counselor_id = f.counselor_id
-        JOIN Visit v ON v.visit_id = i.visit_id
+        JOIN Visit v ON v.visit_id = f.visit_id
         JOIN Student s ON s.student_id = v.student_id
+        JOIN Counselor c ON c.counselor_id = f.counselor_id
         ORDER BY f.date DESC, f.followup_id DESC
         """
     ).fetchall()
+
     conn.close()
 
     return render_template(
