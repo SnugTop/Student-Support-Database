@@ -1345,17 +1345,13 @@ def remove_course(student_id, course_id):
     return redirect(url_for("view_student", student_id=student_id))
 
 
-
-
-
-# ---------- REPORTS / ANALYTICS ----------
 # ---------- REPORTS / ANALYTICS ----------
 
 @app.route("/reports")
 def reports_index():
     """
-    Landing page that lists all available reports.
-    Each report_id maps to a specific SQL query in report_detail().
+    Landing page that lists all available reports. each report is a link to a new page that displays the
+    report corresponding to a specific requirement in the assignment.
     """
     reports = [
         {"id": 1,  "title": "1. Counselor data (directory)"},
@@ -1368,7 +1364,7 @@ def reports_index():
         {"id": 8,  "title": "8. Counts of referrals / financial / coursework help"},
         {"id": 9,  "title": "9. Students flagged as critical"},
         {"id": 10, "title": "10. Students who have not reported back after support"},
-        {"id": 11, "title": "11. Counselors who never followed up"},
+        {"id": 11, "title": "11. Counselors who have open follow ups"},
         {"id": 12, "title": "12. Counselors on payroll vs volunteers"},
         {"id": 13, "title": "13. Min / Max / Avg salary of paid counselors"},
         {"id": 14, "title": "14. Students with multiple issues"},
@@ -1382,9 +1378,8 @@ def reports_index():
 @app.route("/reports/<int:report_id>")
 def report_detail(report_id):
     """
-    Runs a specific pre-written SQL report and shows the result
-    in a generic table, similar to the SQL console.
-    One report_id -> one (possibly UNIONed) SQL query.
+    Runs a specific pre-written SQL report that corresponds to one of the requirements from the assignment
+    and shows the result in a table.
     """
     title = ""
     description = ""
@@ -1659,18 +1654,19 @@ def report_detail(report_id):
 
         # ---------- 11. Counselors who never followed up with any student ----------
         elif report_id == 11:
-            title = "11. Counselors who never followed up with any student"
+            title = "11. Counselors With Open Follow-Ups"
             description = "Shows counselors that have no records in the Followup table."
             sql = """
-                SELECT
+                SELECT DISTINCT
                     c.counselor_id,
                     c.name,
                     c.paid_volunteer
                 FROM Counselor c
-                LEFT JOIN Followup f
-                    ON f.counselor_id = c.counselor_id
-                WHERE f.counselor_id IS NULL
-                ORDER BY c.name
+                JOIN Followup f ON f.counselor_id = c.counselor_id
+                WHERE f.complete IS NULL
+                   OR f.complete = ''
+                   OR f.complete = 0
+                ORDER BY c.name;
             """
             cur = conn.execute(sql)
             rows = cur.fetchall()
@@ -1679,18 +1675,31 @@ def report_detail(report_id):
         # ---------- 12. Counselors on payroll vs volunteers ----------
         elif report_id == 12:
             title = "12. Counselors on payroll vs volunteers"
-            description = "Counts how many counselors are paid vs volunteers."
-            sql = """
+            description = "Shows each counselor's role and also the counts by type."
+
+            sql_list = """
                 SELECT
-                    paid_volunteer,
+                    counselor_id,
+                    name,
+                    paid_volunteer AS role
+                FROM Counselor
+                ORDER BY role, name
+            """
+            cur = conn.execute(sql_list)
+            rows = cur.fetchall()
+            headers = [col[0] for col in cur.description]
+
+            sql_counts = """
+                SELECT
+                    paid_volunteer AS role,
                     COUNT(*) AS num_counselors
                 FROM Counselor
                 GROUP BY paid_volunteer
-                ORDER BY paid_volunteer
+                ORDER BY role
             """
-            cur = conn.execute(sql)
-            rows = cur.fetchall()
-            headers = [col[0] for col in cur.description]
+            cur2 = conn.execute(sql_counts)
+            rows2 = cur2.fetchall()
+            headers2 = [col[0] for col in cur2.description]
 
         # ---------- 13. Min, max, avg salary of paid counselors ----------
         elif report_id == 13:

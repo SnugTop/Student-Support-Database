@@ -141,13 +141,15 @@ ORDER BY s.name;
 -- Question 11:
 -- Counselors who never followed up with any student (We dont have any data for this)
 -- -----------------------------
-SELECT
-  c.counselor_id,
-  c.name,
-  c.paid_volunteer
+SELECT DISTINCT
+    c.counselor_id,
+    c.name,
+    c.paid_volunteer
 FROM Counselor c
-LEFT JOIN Followup f ON f.counselor_id = c.counselor_id
-WHERE f.counselor_id IS NULL
+JOIN Followup f ON f.counselor_id = c.counselor_id
+WHERE f.complete IS NULL
+   OR f.complete = ''
+   OR f.complete = 0
 ORDER BY c.name;
 
 
