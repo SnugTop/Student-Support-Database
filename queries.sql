@@ -1,5 +1,5 @@
 -- -----------------------------
--- Question 3:
+-- Question 1:
 --  Finding Counselor Data
 -- -----------------------------
 SELECT counselor_id, name, paid_volunteer, education, experience
@@ -7,7 +7,7 @@ FROM Counselor
 ORDER BY name;
 
 -- -----------------------------
--- Question 3:
+-- Question 2:
 -- Finding Student Data
 -- -----------------------------
 SELECT student_id, name, dob, country_of_birth, gender, consent, zip_code
@@ -31,10 +31,10 @@ GROUP BY gender
 ORDER BY num_students DESC;
 
 -- By Age
-SELECT age, COUNT(*) AS num_students
-FROM Student
-GROUP BY age
-ORDER BY num_students DESC;
+-- SELECT age, COUNT(*) AS num_students
+-- FROM Student
+-- GROUP BY age
+-- ORDER BY num_students DESC;
 
 
 -- -----------------------------
@@ -221,9 +221,7 @@ SELECT
   s.zip_code,
   COUNT(DISTINCT s.student_id) AS num_students_with_health_issues
 FROM Diagnosis d
-JOIN Issue i ON i.issue_id = d.issue_id
-JOIN Visit v ON v.visit_id = i.visit_id
-JOIN Student s ON s.student_id = v.student_id
+JOIN Student s ON s.student_id = d.student_id
 GROUP BY s.zip_code
 ORDER BY num_students_with_health_issues DESC, s.zip_code;
 
