@@ -142,7 +142,7 @@ body {
   background-color: #f9fafb;
 }
 
-/* --------- Tables (students, counselors, etc.) --------- */
+/* --------- Tables --------- */
 
 .table {
   width: 100%;
@@ -166,7 +166,7 @@ body {
   border-bottom: none;
 }
 
-/* --------- Forms (for later use) --------- */
+/* --------- Forms --------- */
 
 .form {
   display: flex;
