@@ -35,32 +35,101 @@ def list_students():
     gender_filter = request.args.get("gender", "")
     zip_filter = request.args.get("zip", "")
 
+    visits_op = request.args.get("visits_op", "")
+    visits_num = request.args.get("visits_num", "")
+
+    issues_op = request.args.get("issues_op", "")
+    issues_num = request.args.get("issues_num", "")
+
+    critical_filter = request.args.get("critical_filter", "")
+
     conn = get_db_connection()
 
-    # Fetch unique options for dropdowns
-    countries = [row["country_of_birth"] for row in conn.execute("SELECT DISTINCT country_of_birth FROM Student ORDER BY country_of_birth").fetchall()]
-    genders = [row["gender"] for row in conn.execute("SELECT DISTINCT gender FROM Student ORDER BY gender").fetchall()]
-    zips = [row["zip_code"] for row in conn.execute("SELECT DISTINCT zip_code FROM Student ORDER BY zip_code").fetchall()]
+    # Dropdown values
+    countries = [row["country_of_birth"] for row in conn.execute(
+        "SELECT DISTINCT country_of_birth FROM Student ORDER BY country_of_birth"
+    ).fetchall()]
+    genders = [row["gender"] for row in conn.execute(
+        "SELECT DISTINCT gender FROM Student ORDER BY gender"
+    ).fetchall()]
+    zips = [row["zip_code"] for row in conn.execute(
+        "SELECT DISTINCT zip_code FROM Student ORDER BY zip_code"
+    ).fetchall()]
 
-    # Build dynamic query
-    query = "SELECT * FROM Student WHERE 1=1"
-    params = []
+    # Build WHERE (pre-group) clauses + params
+    where_clauses = ["1 = 1"]
+    where_params = []
 
     if search:
-        query += " AND name LIKE ?"
-        params.append(f"%{search}%")
+        where_clauses.append("s.name LIKE ?")
+        where_params.append(f"%{search}%")
     if country_filter:
-        query += " AND country_of_birth = ?"
-        params.append(country_filter)
+        where_clauses.append("s.country_of_birth = ?")
+        where_params.append(country_filter)
     if gender_filter:
-        query += " AND gender = ?"
-        params.append(gender_filter)
+        where_clauses.append("s.gender = ?")
+        where_params.append(gender_filter)
     if zip_filter:
-        query += " AND zip_code = ?"
-        params.append(zip_filter)
+        where_clauses.append("s.zip_code = ?")
+        where_params.append(zip_filter)
 
-    query += " ORDER BY name"
-    students = conn.execute(query, params).fetchall()
+    where_sql = " AND ".join(where_clauses)
+
+    # Build main query. Note: compute `critical` as 0/1 robustly (handles boolean or text)
+    query = f"""
+        SELECT
+            s.*,
+            COUNT(DISTINCT v.visit_id) AS num_visits,
+            COUNT(i.issue_id) AS num_issues,
+            MAX(CASE
+                    WHEN i.severity IN (1, '1', 't', 'T', 'true', 'TRUE') THEN 1
+                    ELSE 0
+                END) AS critical
+        FROM Student s
+        LEFT JOIN Visit v ON v.student_id = s.student_id
+        LEFT JOIN Issue i ON i.visit_id = v.visit_id
+        WHERE {where_sql}
+        GROUP BY s.student_id
+    """
+
+    # Build HAVING clauses (post-group) and params separately to avoid ordering bugs
+    having_clauses = ["1 = 1"]
+    having_params = []
+
+    # visits filter
+    if visits_op in ("<", "=", ">") and visits_num != "":
+        try:
+            vn = int(visits_num)
+            having_clauses.append(f"num_visits {visits_op} ?")
+            having_params.append(vn)
+        except ValueError:
+            # ignore invalid input (non-integer); could also flash a message
+            pass
+
+    # issues filter
+    if issues_op in ("<", "=", ">") and issues_num != "":
+        try:
+            inum = int(issues_num)
+            having_clauses.append(f"num_issues {issues_op} ?")
+            having_params.append(inum)
+        except ValueError:
+            pass
+
+    # critical filter (we computed critical as 0/1 above)
+    if critical_filter == "Yes":
+        having_clauses.append("critical = 1")
+    elif critical_filter == "No":
+        having_clauses.append("critical = 0")
+
+    having_sql = " AND ".join(having_clauses)
+
+    # final query
+    final_query = query + " HAVING " + having_sql + " ORDER BY s.name"
+
+    # combine params: WHERE params come first (bound to the WHERE placeholders), then HAVING params
+    all_params = where_params + having_params
+
+    students = conn.execute(final_query, all_params).fetchall()
     conn.close()
 
     return render_template(
@@ -72,8 +141,15 @@ def list_students():
         zips=zips,
         country_filter=country_filter,
         gender_filter=gender_filter,
-        zip_filter=zip_filter
+        zip_filter=zip_filter,
+        visits_op=visits_op,
+        visits_num=visits_num,
+        issues_op=issues_op,
+        issues_num=issues_num,
+        critical_filter=critical_filter
     )
+
+
 
 @app.route("/students/new", methods=["GET", "POST"])
 def new_student():

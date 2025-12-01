@@ -23,11 +23,12 @@
 
         <form method="get" action="{{ url_for('list_students') }}" class="search-form">
           <input type="text"
-                name="search"
-                placeholder="Search by name..."
-                value="{{ search }}"
-                class="search-input">
+                 name="search"
+                 placeholder="Search by name..."
+                 value="{{ search }}"
+                 class="search-input">
 
+          <!-- COUNTRY -->
           <select name="country" class="search-select">
             <option value="">All Countries</option>
             {% for country in countries %}
@@ -35,6 +36,7 @@
             {% endfor %}
           </select>
 
+          <!-- GENDER -->
           <select name="gender" class="search-select">
             <option value="">All Genders</option>
             {% for g in genders %}
@@ -42,11 +44,37 @@
             {% endfor %}
           </select>
 
+          <!-- ZIP -->
           <select name="zip" class="search-select">
             <option value="">All ZIPs</option>
             {% for z in zips %}
               <option value="{{ z }}" {% if z == zip_filter %}selected{% endif %}>{{ z }}</option>
             {% endfor %}
+          </select>
+
+          <!-- VISIT FILTERS -->
+          <select name="visits_op" class="search-select">
+            <option value="">Visits: Any</option>
+            <option value="<" {% if visits_op == "<" %}selected{% endif %}>&lt;</option>
+            <option value="=" {% if visits_op == "=" %}selected{% endif %}>=</option>
+            <option value=">" {% if visits_op == ">" %}selected{% endif %}>&gt;</option>
+          </select>
+          <input type="number" name="visits_num" value="{{ visits_num }}" placeholder="#" class="search-input small-input">
+
+          <!-- ISSUE FILTERS -->
+          <select name="issues_op" class="search-select">
+            <option value="">Issues: Any</option>
+            <option value="<" {% if issues_op == "<" %}selected{% endif %}>&lt;</option>
+            <option value="=" {% if issues_op == "=" %}selected{% endif %}>=</option>
+            <option value=">" {% if issues_op == ">" %}selected{% endif %}>&gt;</option>
+          </select>
+          <input type="number" name="issues_num" value="{{ issues_num }}" placeholder="#" class="search-input small-input">
+
+          <!-- CRITICAL FILTER -->
+          <select name="critical_filter" class="search-select">
+            <option value="">Critical: Any</option>
+            <option value="Yes" {% if critical_filter == "Yes" %}selected{% endif %}>Yes</option>
+            <option value="No" {% if critical_filter == "No" %}selected{% endif %}>No</option>
           </select>
 
           <button type="submit" class="button-link">Filter</button>
@@ -65,6 +93,9 @@
               <th>Gender</th>
               <th>Consent</th>
               <th>ZIP</th>
+              <th># Visits</th>
+              <th># Issues</th>
+              <th>Critical</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -78,6 +109,9 @@
                 <td>{{ s.gender }}</td>
                 <td>{{ 'Yes' if s.consent else 'No' }}</td>
                 <td>{{ s.zip_code }}</td>
+                <td>{{ s.num_visits }}</td>
+                <td>{{ s.num_issues }}</td>
+                <td>{{ 'Yes' if s.critical else 'No' }}</td>
                 <td>
                   <form method="post"
                         action="{{ url_for('delete_student', student_id=s.student_id) }}"
