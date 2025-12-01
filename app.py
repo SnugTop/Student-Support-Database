@@ -372,13 +372,17 @@ def edit_student(student_id):
 def list_counselors():
     conn = get_db_connection()
 
-    # Get filter values from request
+    # Get filters
     type_filter = request.args.get("type", "")
     education_filter = request.args.get("education", "")
     exp_operator = request.args.get("exp_operator", ">=")
     exp_value = request.args.get("exp_value", "")
     salary_operator = request.args.get("salary_operator", ">=")
     salary_value = request.args.get("salary_value", "")
+
+    # Sorting parameters
+    sort = request.args.get("sort", "")
+    order = request.args.get("order", "asc")  # asc or desc
 
     # Base query
     query = """
@@ -389,6 +393,7 @@ def list_counselors():
     """
     params = []
 
+    # Filters
     if type_filter:
         query += " AND c.paid_volunteer = ?"
         params.append(type_filter)
@@ -402,14 +407,44 @@ def list_counselors():
         params.append(exp_value)
 
     if salary_value:
-        query += f" AND (cs.salary {salary_operator} ?) "
+        query += f" AND (cs.salary {salary_operator} ?)"
         params.append(salary_value)
 
-    query += " ORDER BY c.name"
+    # Sorting
+    if sort == "salary":
+        query += f" ORDER BY cs.salary {'ASC' if order == 'asc' else 'DESC'}"
+    else:
+        query += " ORDER BY c.name ASC"
+
     counselors = conn.execute(query, params).fetchall()
 
-    # Get distinct education options for dropdown
-    educations = [row["education"] for row in conn.execute("SELECT DISTINCT education FROM Counselor").fetchall()]
+    # Compute average salary for filtered results
+    avg_query = """
+        SELECT AVG(cs.salary) AS avg_salary
+        FROM Counselor c
+        LEFT JOIN Counselor_Salary cs ON c.counselor_id = cs.counselor_id
+        WHERE 1=1
+    """
+    avg_params = list(params)  # same filters
+
+    # Same WHERE clauses
+    if type_filter:
+        avg_query += " AND c.paid_volunteer = ?"
+    if education_filter:
+        avg_query += " AND c.education = ?"
+    if exp_value:
+        avg_query += f" AND c.experience {exp_operator} ?"
+    if salary_value:
+        avg_query += f" AND cs.salary {salary_operator} ?"
+
+    avg_salary_row = conn.execute(avg_query, avg_params).fetchone()
+    avg_salary = avg_salary_row["avg_salary"] if avg_salary_row else None
+
+    # Distinct list of educations
+    educations = [
+        row["education"]
+        for row in conn.execute("SELECT DISTINCT education FROM Counselor").fetchall()
+    ]
 
     conn.close()
 
@@ -422,7 +457,10 @@ def list_counselors():
         exp_value=exp_value,
         salary_operator=salary_operator,
         salary_value=salary_value,
-        educations=educations
+        educations=educations,
+        sort=sort,
+        order=order,
+        avg_salary=avg_salary
     )
 
 # ---------- COUNSELOR VIEW ----------
