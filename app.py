@@ -251,8 +251,6 @@ def view_student(student_id):
     )
 
 
-
-
 @app.route("/students/<int:student_id>/delete", methods=["POST"])
 def delete_student(student_id):
     conn = get_db_connection()
