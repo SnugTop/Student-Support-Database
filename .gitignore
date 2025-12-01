@@ -1,1 +1,5 @@
 student_support_center.db
+__pycache__/
+*.pyc
+db-project/
+.DS_Store
