@@ -1214,94 +1214,163 @@ def edit_visit(visit_id):
 def edit_issue(issue_id):
     conn = get_db_connection()
 
-    # Fetch issue info
+    # Fetch issue
     issue = conn.execute("SELECT * FROM Issue WHERE issue_id = ?", (issue_id,)).fetchone()
     if not issue:
         conn.close()
         return "Issue not found", 404
 
-    # Fetch categories and types
+    # All categories
     categories = conn.execute("SELECT category_id, name FROM Category").fetchall()
-    selected_categories = [c['category_id'] for c in conn.execute(
+    selected_categories = [row["category_id"] for row in conn.execute(
         "SELECT category_id FROM Issue_Category WHERE issue_id = ?", (issue_id,)
     ).fetchall()]
 
-    types = conn.execute(
+    # Which types exist
+    types = [row["issue_type"] for row in conn.execute(
         "SELECT issue_type FROM Issue_Type WHERE issue_id = ?", (issue_id,)
-    ).fetchall()
-    type_list = [t['issue_type'] for t in types]
+    )]
 
-    referral_details = ''
-    if 'Referral' in type_list:
-        referral = conn.execute(
-            "SELECT details FROM Referral WHERE issue_id = ?", (issue_id,)
-        ).fetchone()
-        if referral:
-            referral_details = referral['details']
+    # Referral data
+    referral_details = None
+    if "Referral" in types:
+        r = conn.execute("SELECT details FROM Referral WHERE issue_id = ?", (issue_id,)).fetchone()
+        referral_details = r["details"] if r else ""
 
+    # Coursework data
+    coursework_course_id = None
+    coursework_dean_notes = None
+    if "Coursework" in types:
+        cw = conn.execute("SELECT course_id, dean_notes FROM Coursework WHERE issue_id = ?", (issue_id,)).fetchone()
+        if cw:
+            coursework_course_id = cw["course_id"]
+            coursework_dean_notes = cw["dean_notes"]
+
+    # Financial data
+    financial_job_notes = None
+    if "Financial" in types:
+        fin = conn.execute("SELECT job_notes FROM Financial WHERE issue_id = ?", (issue_id,)).fetchone()
+        if fin:
+            financial_job_notes = fin["job_notes"]
+
+    # Get all courses for dropdown
+    all_courses = conn.execute("SELECT course_id, course_name FROM Course").fetchall()
+
+    # -------- POST ----------
     if request.method == "POST":
         description = request.form["description"]
         critical = int(request.form["critical"])
         selected_category_ids = request.form.getlist("categories")
-        issue_types = []
+
         referral_flag = request.form.get("referral")
         coursework_flag = request.form.get("coursework")
         financial_flag = request.form.get("financial")
-        referral_text = request.form.get("referral_details", "")
+
+        referral_text = request.form.get("referral_details")
+        course_id = request.form.get("course_id") or None
+        dean_notes = request.form.get("dean_notes")
+        job_notes = request.form.get("job_notes")
 
         # Update issue
         conn.execute(
-            "UPDATE Issue SET issue_description = ?, severity = ? WHERE issue_id = ?",
+            "UPDATE Issue SET issue_description=?, severity=? WHERE issue_id=?",
             (description, critical, issue_id)
         )
 
         # Update categories
-        conn.execute("DELETE FROM Issue_Category WHERE issue_id = ?", (issue_id,))
-        for cat_id in selected_category_ids:
+        conn.execute("DELETE FROM Issue_Category WHERE issue_id=?", (issue_id,))
+        for cid in selected_category_ids:
             conn.execute(
                 "INSERT INTO Issue_Category (issue_id, category_id) VALUES (?, ?)",
-                (issue_id, cat_id)
+                (issue_id, cid)
             )
 
-        # Update issue types
-        conn.execute("DELETE FROM Issue_Type WHERE issue_id = ?", (issue_id,))
+        # Clear all types
+        conn.execute("DELETE FROM Issue_Type WHERE issue_id=?", (issue_id,))
+
+        # ---- REFERRAL ----
         if referral_flag:
             conn.execute(
-                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
-                (issue_id, "Referral")
+                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Referral')",
+                (issue_id,)
             )
-            # Update referral table
-            exists = conn.execute("SELECT COUNT(*) FROM Referral WHERE issue_id = ?", (issue_id,)).fetchone()[0]
+
+            exists = conn.execute("SELECT 1 FROM Referral WHERE issue_id=?", (issue_id,)).fetchone()
             if exists:
-                conn.execute("UPDATE Referral SET details = ? WHERE issue_id = ?", (referral_text, issue_id))
+                conn.execute("UPDATE Referral SET details=? WHERE issue_id=?", (referral_text, issue_id))
             else:
-                next_ref_id = conn.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
-                conn.execute("INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
-                             (next_ref_id, issue_id, referral_text))
+                next_id = conn.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
+                conn.execute(
+                    "INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
+                    (next_id, issue_id, referral_text)
+                )
+        else:
+            conn.execute("DELETE FROM Referral WHERE issue_id=?", (issue_id,))
+
+        # ---- COURSEWORK ----
         if coursework_flag:
             conn.execute(
-                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
-                (issue_id, "Coursework")
+                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Coursework')",
+                (issue_id,)
             )
+
+            exists = conn.execute("SELECT 1 FROM Coursework WHERE issue_id=?", (issue_id,)).fetchone()
+            if exists:
+                conn.execute(
+                    "UPDATE Coursework SET course_id=?, dean_notes=? WHERE issue_id=?",
+                    (course_id, dean_notes, issue_id)
+                )
+            else:
+                next_id = conn.execute("SELECT COALESCE(MAX(coursework_id),0)+1 FROM Coursework").fetchone()[0]
+                conn.execute(
+                    "INSERT INTO Coursework (coursework_id, issue_id, course_id, dean_notes, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                    (next_id, issue_id, course_id, dean_notes)
+                )
+        else:
+            conn.execute("DELETE FROM Coursework WHERE issue_id=?", (issue_id,))
+
+        # ---- FINANCIAL ----
         if financial_flag:
             conn.execute(
-                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, ?)",
-                (issue_id, "Financial")
+                "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Financial')",
+                (issue_id,)
             )
+
+            exists = conn.execute("SELECT 1 FROM Financial WHERE issue_id=?", (issue_id,)).fetchone()
+            if exists:
+                conn.execute(
+                    "UPDATE Financial SET job_notes=? WHERE issue_id=?",
+                    (job_notes, issue_id)
+                )
+            else:
+                next_id = conn.execute("SELECT COALESCE(MAX(financial_id),0)+1 FROM Financial").fetchone()[0]
+                conn.execute(
+                    "INSERT INTO Financial (financial_id, issue_id, job_notes, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
+                    (next_id, issue_id, job_notes)
+                )
+        else:
+            conn.execute("DELETE FROM Financial WHERE issue_id=?", (issue_id,))
 
         conn.commit()
         conn.close()
         return redirect(url_for("visit_detail", visit_id=issue["visit_id"]))
 
     conn.close()
-    return render_template("edit_issue.html",
-                           issue=issue,
-                           categories=categories,
-                           selected_categories=selected_categories,
-                           referral_flag='Referral' in type_list,
-                           coursework_flag='Coursework' in type_list,
-                           financial_flag='Financial' in type_list,
-                           referral_details=referral_details)
+    return render_template(
+        "edit_issue.html",
+        issue=issue,
+        categories=categories,
+        selected_categories=selected_categories,
+        referral_flag=("Referral" in types),
+        coursework_flag=("Coursework" in types),
+        financial_flag=("Financial" in types),
+        referral_details=referral_details,
+        coursework_course_id=coursework_course_id,
+        coursework_dean_notes=coursework_dean_notes,
+        financial_job_notes=financial_job_notes,
+        all_courses=all_courses
+    )
+
 
 
 # ---------- SQL Console ----------
@@ -1345,47 +1414,147 @@ def sql_console():
 # ---------- REFERRALS & FOLLOWUPS ----------
 @app.route("/referrals")
 def list_referrals():
+    student_filter = request.args.get("student", None)
+
     conn = get_db_connection()
 
-    referrals = conn.execute(
-        """
+    # For dropdown filter
+    students = conn.execute("""
+        SELECT DISTINCT name FROM Student ORDER BY name
+    """).fetchall()
+
+    # Referrals --------------------------------------------------------------------
+    referrals_query = """
         SELECT
           r.referral_id,
+          r.issue_id,
           r.created_at,
           r.details,
+          r.student_report,
+          r.student_reported_at,
+          v.visit_id,
           s.name AS student_name
         FROM Referral r
         JOIN Issue i ON i.issue_id = r.issue_id
         JOIN Visit v ON v.visit_id = i.visit_id
         JOIN Student s ON s.student_id = v.student_id
-        ORDER BY r.created_at DESC, r.referral_id DESC
-        """
-    ).fetchall()
+    """
 
-    followups = conn.execute(
-        """
+    params = []
+
+    if student_filter:
+        referrals_query += " WHERE s.name = ? "
+        params.append(student_filter)
+
+    referrals_query += " ORDER BY r.created_at DESC, r.referral_id DESC "
+
+    referrals = conn.execute(referrals_query, params).fetchall()
+
+    # Coursework -------------------------------------------------------------------
+    coursework = conn.execute(f"""
         SELECT
-          f.followup_id,
-          f.date,
-          f.notes,
-          f.complete,
-          s.name AS student_name,
-          c.name AS counselor_name
-        FROM Followup f
-        JOIN Visit v ON v.visit_id = f.visit_id
+          c.coursework_id,
+          c.course_id,
+          c.issue_id,
+          c.dean_notes,
+          c.student_report,
+          c.student_reported_at,
+          c.created_at,
+          v.visit_id,
+          s.name AS student_name
+        FROM Coursework c
+        JOIN Issue i ON i.issue_id = c.issue_id
+        JOIN Visit v ON v.visit_id = i.visit_id
         JOIN Student s ON s.student_id = v.student_id
-        JOIN Counselor c ON c.counselor_id = f.counselor_id
-        ORDER BY f.date DESC, f.followup_id DESC
-        """
-    ).fetchall()
+        { "WHERE s.name = ?" if student_filter else "" }
+        ORDER BY c.created_at DESC, c.coursework_id DESC
+    """, params if student_filter else []).fetchall()
+
+    # Financial --------------------------------------------------------------------
+    financial = conn.execute(f"""
+        SELECT
+          f.financial_id,
+          f.issue_id,
+          f.job_notes,
+          f.student_report,
+          f.student_reported_at,
+          f.created_at,
+          v.visit_id,
+          s.name AS student_name
+        FROM Financial f
+        JOIN Issue i ON i.issue_id = f.issue_id
+        JOIN Visit v ON v.visit_id = i.visit_id
+        JOIN Student s ON s.student_id = v.student_id
+        { "WHERE s.name = ?" if student_filter else "" }
+        ORDER BY f.created_at DESC, f.financial_id DESC
+    """, params if student_filter else []).fetchall()
 
     conn.close()
 
     return render_template(
         "referrals.html",
+        students=students,
         referrals=referrals,
-        followups=followups,
+        coursework=coursework,
+        financial=financial,
+        student_filter=student_filter
     )
+
+
+# ------------------UPDATE ISSUE TYPES -----------------------
+
+@app.route("/update_referral_inline/<int:referral_id>", methods=["POST"])
+def update_referral_inline(referral_id):
+    new_report = request.form.get("student_report")
+    new_reported_at = request.form.get("student_reported_at")
+
+    conn = get_db_connection()
+    conn.execute("""
+        UPDATE Referral
+        SET student_report = ?, student_reported_at = ?
+        WHERE referral_id = ?
+    """, (new_report, new_reported_at, referral_id))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("list_referrals"))
+
+
+@app.route("/update_coursework_inline/<int:coursework_id>", methods=["POST"])
+def update_coursework_inline(coursework_id):
+    dean_notes = request.form.get("dean_notes")
+    student_report = request.form.get("student_report")
+    student_reported_at = request.form.get("student_reported_at")
+
+    conn = get_db_connection()
+    conn.execute("""
+        UPDATE Coursework
+        SET dean_notes = ?, student_report = ?, student_reported_at = ?
+        WHERE coursework_id = ?
+    """, (dean_notes, student_report, student_reported_at, coursework_id))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("list_referrals"))
+
+
+@app.route("/update_financial_inline/<int:financial_id>", methods=["POST"])
+def update_financial_inline(financial_id):
+    job_notes = request.form.get("job_notes")
+    student_report = request.form.get("student_report")
+    student_reported_at = request.form.get("student_reported_at")
+
+    conn = get_db_connection()
+    conn.execute("""
+        UPDATE Financial
+        SET job_notes = ?, student_report = ?, student_reported_at = ?
+        WHERE financial_id = ?
+    """, (job_notes, student_report, student_reported_at, financial_id))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("list_referrals"))
+
 
 # ------------------ DIAGNOSIS ROUTES ------------------
 

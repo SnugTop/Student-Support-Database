@@ -229,6 +229,7 @@ CREATE TABLE Coursework (
     coursework_id INT PRIMARY KEY,
     course_id INT NOT NULL,
     issue_id INT NOT NULL,
+    dean_notes TEXT,
     student_report TEXT,
     created_at DATE NOT NULL,
     student_reported_at DATE,

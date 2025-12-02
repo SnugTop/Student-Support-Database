@@ -4,17 +4,26 @@
   <meta charset="UTF-8">
   <title>Edit Issue {{ issue.issue_id }} - Student Support Center</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script>
-    function toggleReferralDetails() {
-      const referralCheckbox = document.getElementById("referral");
-      const referralDetails = document.getElementById("referral_details_row");
-      referralDetails.style.display = referralCheckbox.checked ? "block" : "none";
-    }
-    window.addEventListener("DOMContentLoaded", toggleReferralDetails);
-  </script>
+
   <!-- Choices.js -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+  <script>
+    function toggleSections() {
+      document.getElementById("referral_section").style.display =
+        document.getElementById("referral").checked ? "block" : "none";
+
+      document.getElementById("coursework_section").style.display =
+        document.getElementById("coursework").checked ? "block" : "none";
+
+      document.getElementById("financial_section").style.display =
+        document.getElementById("financial").checked ? "block" : "none";
+    }
+
+    window.addEventListener("DOMContentLoaded", toggleSections);
+  </script>
+
 </head>
 <body>
   <div class="page">
@@ -26,11 +35,14 @@
     <main class="content">
       <div class="card">
         <form method="post" class="form">
+
+          <!-- Description -->
           <div class="form-row">
             <label for="description">Issue Description</label>
             <textarea id="description" name="description" required>{{ issue.issue_description }}</textarea>
           </div>
 
+          <!-- Critical -->
           <div class="form-row">
             <label for="critical">Critical?</label>
             <select id="critical" name="critical" required>
@@ -39,51 +51,94 @@
             </select>
           </div>
 
+          <!-- Categories -->
           <div class="form-row">
             <label for="categories">Categories (select at least one)</label>
             <select id="categories" name="categories" multiple required>
                 {% for c in categories %}
-                <option value="{{ c.category_id }}" {% if c.category_id in selected_categories %} selected {% endif %}>
+                <option value="{{ c.category_id }}"
+                    {% if c.category_id in selected_categories %} selected {% endif %}>
                     {{ c.name }}
                 </option>
                 {% endfor %}
             </select>
           </div>
 
+          <!-- Type Checkboxes -->
           <div class="form-row">
             <label>Issue Types</label>
+
             <label><input type="checkbox" id="referral" name="referral" value="1"
               {% if referral_flag %} checked {% endif %}
-              onclick="toggleReferralDetails()"> Referral</label>
+              onclick="toggleSections()"> Referral</label>
 
-            <label><input type="checkbox" name="coursework" value="1"
-              {% if coursework_flag %} checked {% endif %}> Coursework</label>
+            <label><input type="checkbox" id="coursework" name="coursework" value="1"
+              {% if coursework_flag %} checked {% endif %}
+              onclick="toggleSections()"> Coursework</label>
 
-            <label><input type="checkbox" name="financial" value="1"
-              {% if financial_flag %} checked {% endif %}> Financial</label>
+            <label><input type="checkbox" id="financial" name="financial" value="1"
+              {% if financial_flag %} checked {% endif %}
+              onclick="toggleSections()"> Financial</label>
           </div>
 
-          <div class="form-row" id="referral_details_row" style="display:none;">
-            <label for="referral_details">Referral Details</label>
-            <textarea id="referral_details" name="referral_details">{{ referral_details }}</textarea>
+          <!-- Referral Section -->
+          <div id="referral_section" style="display:none;">
+            <div class="form-row">
+              <label for="referral_details">Referral Details</label>
+              <textarea id="referral_details" name="referral_details">{{ referral_details }}</textarea>
+            </div>
+          </div>
+
+          <!-- Coursework Section -->
+          <div id="coursework_section" style="display:none;">
+            <div class="form-row">
+              <label for="course_id">Course Involved</label>
+              <select id="course_id" name="course_id">
+                <option value="">-- None --</option>
+                {% for c in all_courses %}
+                <option value="{{ c.course_id }}"
+                  {% if coursework_course_id == c.course_id %} selected {% endif %}>
+                  {{ c.course_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="dean_notes">Dean Notes</label>
+              <textarea id="dean_notes" name="dean_notes">{{ coursework_dean_notes }}</textarea>
+            </div>
+          </div>
+
+          <!-- Financial Section -->
+          <div id="financial_section" style="display:none;">
+            <div class="form-row">
+              <label for="job_notes">Job Notes</label>
+              <textarea id="job_notes" name="job_notes">{{ financial_job_notes }}</textarea>
+            </div>
           </div>
 
           <div class="form-actions">
             <button type="submit" class="button-link">Save Issue</button>
             <a href="{{ url_for('visit_detail', visit_id=issue.visit_id) }}" class="button-link secondary">Cancel</a>
           </div>
+
         </form>
       </div>
     </main>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const categorySelect = document.getElementById('categories');
+      if (categorySelect) {
+        new Choices(categorySelect, {
+          removeItemButton: true,
+          searchResultLimit: 10,
+          placeholderValue: 'Select categories'
+        });
+      }
+    });
+  </script>
 </body>
 </html>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const categorySelect = document.getElementById('categories');
-    if (categorySelect) {
-      new Choices(categorySelect, { removeItemButton: true, searchResultLimit: 10, placeholderValue: 'Select categories' });
-    }
-  });
-</script>

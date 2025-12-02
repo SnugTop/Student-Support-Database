@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Referrals & Follow-ups - Student Support Center</title>
+  <title>Referrals - Student Support Center</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+
 <div class="page">
 
   <!-- Header -->
   <header class="top-bar">
     <div class="logo-circle">SSC</div>
-    <h1>Referrals & Follow-ups</h1>
+    <h1>Referrals, Coursework & Financial</h1>
   </header>
 
   <main class="content">
@@ -19,22 +20,42 @@
     <!-- Navigation -->
     <div class="card hero">
       <h2>Healthcare + Support Actions</h2>
-      <p>Track referrals & counselor follow-ups.</p>
-      <p style="margin-top: 0.5rem;">
-        <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
-      </p>
+      <p>Track referrals, coursework, and financial support.</p>
+      <p><a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a></p>
     </div>
 
-    <!-- Referrals -->
+    <!-- Filter -->
     <div class="card">
-      <h3 style="margin-top: 0;">Referrals</h3>
+      <h3>Filter</h3>
+      <form method="get">
+        <label>Student:
+          <select name="student">
+            <option value="">All</option>
+            {% for s in students %}
+              <option value="{{ s.name }}" {% if student_filter == s.name %}selected{% endif %}>
+                {{ s.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </label>
+        <button type="submit" class="button-link">Apply</button>
+      </form>
+    </div>
+
+    <!-- Referrals Section -->
+    <div class="card">
+      <h3>Referrals</h3>
       <table class="table">
         <thead>
           <tr>
             <th>ID</th>
             <th>Student</th>
+            <th>Visit</th>
             <th>Details</th>
+            <th>Student Report</th>
+            <th>Reported At</th>
             <th>Date Sent</th>
+            <th>Update</th>
           </tr>
         </thead>
         <tbody>
@@ -42,41 +63,157 @@
           <tr>
             <td>{{ r.referral_id }}</td>
             <td>{{ r.student_name }}</td>
+            <td><a href="/visits/{{ r.visit_id }}">{{ r.visit_id }}</a></td>
             <td>{{ r.details }}</td>
-            <td>{{ r.created_at }}</td>
+
+            <form action="{{ url_for('update_referral_inline', referral_id=r.referral_id) }}" method="POST">
+              <td>
+                {% if r.student_report %}
+                  {{ r.student_report }}
+                {% else %}
+                  <input name="student_report" placeholder="Enter report">
+                {% endif %}
+              </td>
+
+              <td>
+                {% if r.student_reported_at %}
+                  {{ r.student_reported_at }}
+                {% else %}
+                  <input name="student_reported_at" placeholder="Enter time">
+                {% endif %}
+              </td>
+
+              <td>{{ r.created_at }}</td>
+              <td><button type="submit">Save</button></td>
+            </form>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
-    <!-- Follow-ups -->
+
+    <!-- Coursework Section -->
     <div class="card">
-      <h3 style="margin-top: 0;">Follow-ups</h3>
+      <h3>Coursework</h3>
+
       <table class="table">
         <thead>
           <tr>
             <th>ID</th>
             <th>Student</th>
-            <th>Notes</th>
+            <th>Visit</th>
+            <th>Course</th>
+            <th>Dean Notes</th>
+            <th>Student Report</th>
+            <th>Reported At</th>
             <th>Date</th>
-            <th>Done?</th>
+            <th>Update</th>
           </tr>
         </thead>
+
         <tbody>
-          {% for f in followups %}
+          {% for c in coursework %}
           <tr>
-            <td>{{ f.followup_id }}</td>
+            <td>{{ c.coursework_id }}</td>
+            <td>{{ c.student_name }}</td>
+            <td><a href="/visits/{{ c.visit_id }}">{{ c.visit_id }}</a></td>
+            <td>{{ c.course_id }}</td>
+
+            <form action="{{ url_for('update_coursework_inline', coursework_id=c.coursework_id) }}" method="POST">
+
+              <td>
+                {% if c.dean_notes %}
+                  {{ c.dean_notes }}
+                {% else %}
+                  <input name="dean_notes" placeholder="Enter dean notes">
+                {% endif %}
+              </td>
+
+              <td>
+                {% if c.student_report %}
+                  {{ c.student_report }}
+                {% else %}
+                  <input name="student_report" placeholder="Enter report">
+                {% endif %}
+              </td>
+
+              <td>
+                {% if c.student_reported_at %}
+                  {{ c.student_reported_at }}
+                {% else %}
+                  <input name="student_reported_at" placeholder="Enter time">
+                {% endif %}
+              </td>
+
+              <td>{{ c.created_at }}</td>
+              <td><button type="submit">Save</button></td>
+
+            </form>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+
+    <!-- Financial Section -->
+    <div class="card">
+      <h3>Financial</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Visit</th>
+            <th>Job Notes</th>
+            <th>Student Report</th>
+            <th>Reported At</th>
+            <th>Date</th>
+            <th>Update</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for f in financial %}
+          <tr>
+            <td>{{ f.financial_id }}</td>
             <td>{{ f.student_name }}</td>
-            <td>{{ f.notes }}</td>
-            <td>{{ f.date }}</td>
-            <td>
-              {% if f.complete == 1 %}
-                ✔
-              {% else %}
-                ◌
-              {% endif %}
-            </td>
+            <td><a href="/visits/{{ f.visit_id }}">{{ f.visit_id }}</a></td>
+
+            <form action="{{ url_for('update_financial_inline', financial_id=f.financial_id) }}" method="POST">
+
+              <td>
+                {% if f.job_notes %}
+                  {{ f.job_notes }}
+                {% else %}
+                  <input name="job_notes" placeholder="Enter job notes">
+                {% endif %}
+              </td>
+
+              <td>
+                {% if f.student_report %}
+                  {{ f.student_report }}
+                {% else %}
+                  <input name="student_report" placeholder="Enter report">
+                {% endif %}
+              </td>
+
+              <td>
+                {% if f.student_reported_at %}
+                  {{ f.student_reported_at }}
+                {% else %}
+                  <input name="student_reported_at" placeholder="Enter time">
+                {% endif %}
+              </td>
+
+              <td>{{ f.created_at }}</td>
+              <td><button type="submit">Save</button></td>
+
+            </form>
+
           </tr>
           {% endfor %}
         </tbody>
@@ -84,7 +221,7 @@
     </div>
 
   </main>
-
 </div>
+
 </body>
 </html>

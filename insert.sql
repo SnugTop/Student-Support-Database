@@ -26,7 +26,7 @@ PRAGMA foreign_keys = OFF;
 .import --skip 1 data/Visit.csv Visit
 .import --skip 1 data/Visit-Counselor.csv Visit_Counselor
 
-
+PRAGMA foreign_keys = ON;
 
 --MySQL version of imports-------------------------------
 --USE `Student-Support-Center`;
