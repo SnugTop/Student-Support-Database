@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Visits & Issues - Student Support Center</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
   <!-- Choices.js -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
@@ -29,7 +30,8 @@
       </p>
 
       <form method="get" action="{{ url_for('list_visits') }}" class="search-form">
-        <!-- Student multi-select -->
+
+        <!-- Students -->
         <label for="students">Students:</label>
         <select id="students" name="students" multiple>
           {% for s in all_students %}
@@ -45,7 +47,7 @@
           <option value="virtual" {% if mode=='virtual' %}selected{% endif %}>Virtual</option>
         </select>
 
-        <!-- Issue count -->
+        <!-- Issue Count -->
         <label for="issue_op"># Issues:</label>
         <select name="issue_op">
           <option value=">">></option>
@@ -60,6 +62,14 @@
           <option value="" {% if not critical %}selected{% endif %}>Any</option>
           <option value="1" {% if critical=='1' %}selected{% endif %}>Critical</option>
           <option value="0" {% if critical=='0' %}selected{% endif %}>OK</option>
+        </select>
+
+        <!-- Report Needed -->
+        <label for="report_needed">Report Needed:</label>
+        <select id="report_needed" name="report_needed">
+          <option value="" {% if not report_needed %}selected{% endif %}>Any</option>
+          <option value="1" {% if report_needed=='1' %}selected{% endif %}>Yes</option>
+          <option value="0" {% if report_needed=='0' %}selected{% endif %}>No</option>
         </select>
 
         <button type="submit" class="button-link">Apply Filters</button>
@@ -77,6 +87,7 @@
             <th>Mode</th>
             <th># Issues</th>
             <th>Critical?</th>
+            <th>Report Needed?</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -100,6 +111,13 @@
               {% endif %}
             </td>
             <td>
+              {% if v.report_needed %}
+                <span class="badge critical">Yes</span>
+              {% else %}
+                <span class="badge ok">No</span>
+              {% endif %}
+            </td>
+            <td>
               <form method="post"
                     action="{{ url_for('delete_visit', visit_id=v.visit_id) }}"
                     onsubmit="return confirm('Delete this visit?');"
@@ -116,6 +134,7 @@
   </main>
 
 </div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const studentSelect = document.getElementById('students');
@@ -124,5 +143,6 @@
     }
   });
 </script>
+
 </body>
 </html>

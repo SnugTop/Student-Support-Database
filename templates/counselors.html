@@ -70,9 +70,27 @@
               <th>Type</th>
               <th>Education</th>
               <th>Experience (years)</th>
-              <th>Salary</th>
+
+              <!-- Clickable salary sort -->
+              <th>
+                <a href="{{ url_for('list_counselors',
+                                     type=type_filter,
+                                     education=education_filter,
+                                     exp_operator=exp_operator,
+                                     exp_value=exp_value,
+                                     salary_operator=salary_operator,
+                                     salary_value=salary_value,
+                                     sort='salary',
+                                     order='asc' if order != 'asc' else 'desc') }}">
+                  Salary
+                  {% if sort == 'salary' %}
+                    {% if order == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                  {% endif %}
+                </a>
+              </th>
             </tr>
           </thead>
+
           <tbody>
             {% for c in counselors %}
               <tr>
@@ -81,11 +99,22 @@
                 <td>{{ c.paid_volunteer }}</td>
                 <td>{{ c.education }}</td>
                 <td>{{ c.experience }}</td>
-                <td>{% if c.salary %}${{ c.salary }}{% endif %}</td>
+                <td>{% if c.salary %}${{ c.salary }}{% else %}—{% endif %}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
+      </div>
+
+      <div class="card" style="margin-top:1rem; padding:1rem;">
+        <h3>Average Salary</h3>
+        <p style="font-size:1.2rem;">
+          {% if avg_salary %}
+            ${{ "%.2f" | format(avg_salary) }}
+          {% else %}
+            N/A
+          {% endif %}
+        </p>
       </div>
 
     </main>

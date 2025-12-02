@@ -9,6 +9,6 @@ financial_id,issue_id,student_report,job_notes,created_at,student_reported_at
 8,58,"Student is worried about not being able to afford next semester’s housing.","Applied to jobs",10/15/2025,10/28/2025
 9,69,"Student reports anxiety about not having enough savings to stay in school.","Had a coffee chat",10/25/2025,11/9/2025
 10,74,"Student says unexpected expenses have made it hard to keep up with payments.","Went to job fair",10/28/2025,11/3/2025
-11,89,"Student reports they are unsure how they will pay for basic living costs.","",11/6/2025,
-12,99,"Student says they are worried about finances but not sure what options they have.","",11/14/2025,
-13,104,"Student reports concern that lack of funds may force them to leave school.","",11/19/2025,
+11,89,,"",11/6/2025,
+12,99,,"",11/14/2025,
+13,104,,"",11/19/2025,
