@@ -776,12 +776,13 @@ def list_visits():
     conn = get_db_connection()
     all_students = conn.execute("SELECT student_id, name FROM Student").fetchall()
 
-    # Grab filters
+    # Filters
     selected_students = request.args.getlist("students")
     mode = request.args.get("mode")
     issue_op = request.args.get("issue_op")
     issue_val = request.args.get("issue_val")
     critical = request.args.get("critical")
+    report_needed = request.args.get("report_needed")  # NEW
 
     query = """
         SELECT
@@ -790,23 +791,36 @@ def list_visits():
             v.mode,
             s.name AS student_name,
             COUNT(i.issue_id) AS issue_count,
-            -- Evaluate severity robustly: treat various truthy values as 1
+
             COALESCE(MAX(
                 CASE
                     WHEN i.severity IN (1, '1', 'TRUE', 'True', 'true') THEN 1
                     ELSE 0
                 END
-            ), 0) AS has_critical_issue
+            ), 0) AS has_critical_issue,
+
+            -- Report Needed: ANY suggestion where student_report IS NULL
+            CASE
+                WHEN EXISTS (
+                    SELECT 1 FROM Suggestion sg
+                    WHERE sg.visit_id = v.visit_id
+                    AND (sg.student_report IS NULL OR sg.student_report = '')
+                )
+                THEN 1
+                ELSE 0
+            END AS report_needed
+
         FROM Visit v
         JOIN Student s ON s.student_id = v.student_id
         LEFT JOIN Issue i ON i.visit_id = v.visit_id
     """
+
     conditions = []
     params = []
 
-    # Students filter
+    # Student filter
     if selected_students:
-        conditions.append("v.student_id IN ({})".format(",".join("?"*len(selected_students))))
+        conditions.append("v.student_id IN ({})".format(",".join("?" * len(selected_students))))
         params.extend(selected_students)
 
     # Mode filter
@@ -814,45 +828,57 @@ def list_visits():
         conditions.append("v.mode = ?")
         params.append(mode)
 
-    # Apply WHERE conditions
+    # Apply WHERE
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
 
-    # Grouping needed for issue_count and critical
+    # Grouping
     query += " GROUP BY v.visit_id HAVING 1=1"
 
     # Issue count filter
     if issue_val:
         try:
-            issue_val_int = int(issue_val)
-            # validate operator
+            iv = int(issue_val)
             if issue_op in (">", "<", "=", ">=", "<="):
                 query += f" AND COUNT(i.issue_id) {issue_op} ?"
-                params.append(issue_val_int)
+                params.append(iv)
         except ValueError:
             pass
 
-    # Critical filter (visit is critical if ANY linked issue has severity true)
-    # We use the same CASE expression in HAVING to compare against 0/1.
+    # Critical filter
     if critical in ("0", "1"):
         query += """
-         AND COALESCE(MAX(
-             CASE
-                 WHEN i.severity IN (1, '1', 'TRUE', 'True', 'true') THEN 1
-                 ELSE 0
-             END
-         ), 0) = ?
+            AND COALESCE(MAX(
+                CASE
+                    WHEN i.severity IN (1, '1', 'TRUE', 'True', 'true') THEN 1
+                    ELSE 0
+                END
+            ), 0) = ?
         """
         params.append(int(critical))
+
+    # Report Needed filter
+    if report_needed in ("0", "1"):
+        query += " AND CASE WHEN EXISTS (SELECT 1 FROM Suggestion sg WHERE sg.visit_id = v.visit_id AND (sg.student_report IS NULL OR sg.student_report = '')) THEN 1 ELSE 0 END = ?"
+        params.append(int(report_needed))
 
     query += " ORDER BY v.date DESC, v.visit_id DESC"
 
     visits = conn.execute(query, params).fetchall()
     conn.close()
-    return render_template("visits.html", visits=visits, all_students=all_students,
-                           selected_students=selected_students,
-                           mode=mode, issue_op=issue_op, issue_val=issue_val,
-                           critical=critical)
+
+    return render_template(
+        "visits.html",
+        visits=visits,
+        all_students=all_students,
+        selected_students=selected_students,
+        mode=mode,
+        issue_op=issue_op,
+        issue_val=issue_val,
+        critical=critical,
+        report_needed=report_needed
+    )
+
 
 
 
@@ -1457,6 +1483,108 @@ def remove_course(student_id, course_id):
     conn.commit()
     conn.close()
     return redirect(url_for("view_student", student_id=student_id))
+
+
+@app.route("/courses")
+def list_courses():
+    conn = get_db_connection()
+
+    # Filters
+    teacher_filter = request.args.get("teacher", "")
+    period_filter = request.args.get("period", "")
+    classroom_filter = request.args.get("classroom", "")
+    issues_op = request.args.get("issues_op", "")
+    issues_val = request.args.get("issues_val", "")
+    students_op = request.args.get("students_op", "")
+    students_val = request.args.get("students_val", "")
+
+    # Base query: count issues and students
+    query = """
+        SELECT 
+            c.course_id,
+            c.course_name,
+            c.period,
+            c.teacher,
+            c.classroom,
+            COUNT(DISTINCT cs.coursework_id) AS num_issues,
+            COUNT(DISTINCT sc.student_id) AS num_students
+        FROM Course c
+        LEFT JOIN Coursework cs ON cs.course_id = c.course_id
+        LEFT JOIN Student_Course sc ON sc.course_id = c.course_id
+        WHERE 1=1
+    """
+    params = []
+
+    # Filters
+    if teacher_filter:
+        query += " AND c.teacher = ?"
+        params.append(teacher_filter)
+    if period_filter:
+        query += " AND c.period = ?"
+        params.append(period_filter)
+    if classroom_filter:
+        query += " AND c.classroom = ?"
+        params.append(classroom_filter)
+
+    query += " GROUP BY c.course_id HAVING 1=1"
+
+    # Filter by # of issues
+    if issues_val and issues_op in (">", "<", "="):
+        try:
+            issues_val_int = int(issues_val)
+            query += f" AND COUNT(DISTINCT cs.coursework_id) {issues_op} ?"
+            params.append(issues_val_int)
+        except ValueError:
+            pass
+
+    # Filter by # of students
+    if students_val and students_op in (">", "<", "="):
+        try:
+            students_val_int = int(students_val)
+            query += f" AND COUNT(DISTINCT sc.student_id) {students_op} ?"
+            params.append(students_val_int)
+        except ValueError:
+            pass
+
+    query += " ORDER BY c.course_name"
+
+    courses = conn.execute(query, params).fetchall()
+
+    # Get student lists per course
+    course_students = {}
+    for course in courses:
+        students = conn.execute("""
+            SELECT s.student_id, s.name
+            FROM Student_Course sc
+            JOIN Student s ON s.student_id = sc.student_id
+            WHERE sc.course_id = ?
+            ORDER BY s.name
+        """, (course["course_id"],)).fetchall()
+        course_students[course["course_id"]] = students
+
+    # Distinct options for filters
+    teachers = [row["teacher"] for row in conn.execute("SELECT DISTINCT teacher FROM Course").fetchall()]
+    periods = [row["period"] for row in conn.execute("SELECT DISTINCT period FROM Course").fetchall()]
+    classrooms = [row["classroom"] for row in conn.execute("SELECT DISTINCT classroom FROM Course").fetchall()]
+
+    conn.close()
+
+    return render_template(
+        "courses.html",
+        courses=courses,
+        course_students=course_students,
+        teachers=teachers,
+        periods=periods,
+        classrooms=classrooms,
+        teacher_filter=teacher_filter,
+        period_filter=period_filter,
+        classroom_filter=classroom_filter,
+        issues_op=issues_op,
+        issues_val=issues_val,
+        students_op=students_op,
+        students_val=students_val
+    )
+
 
 
 if __name__ == "__main__":

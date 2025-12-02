@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Courses - Student Support Center</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .student-list {
+      display: none;
+      margin-top: 0.5rem;
+      margin-left: 1rem;
+    }
+    .toggle-btn {
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 0.3rem;
+    }
+    .toggle-btn:hover {
+      color: #007BFF;
+    }
+    .filter-row {
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .filter-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top-bar">
+    <div class="logo-circle">SSC</div>
+    <h1>Courses</h1>
+  </header>
+
+  <main class="content">
+
+    <div class="card hero">
+      <h2>Courses</h2>
+      <p>View all courses along with the number of related coursework issues and students. Click the arrow to see enrolled students.</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="{{ url_for('home') }}" class="button-link secondary">← Back to Dashboard</a>
+      </p>
+
+      <!-- Filters -->
+      <form method="get" class="filter-row">
+        <label>Teacher:
+          <select name="teacher">
+            <option value="">Any</option>
+            {% for t in teachers %}
+              <option value="{{ t }}" {% if t == teacher_filter %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>Period:
+          <select name="period">
+            <option value="">Any</option>
+            {% for p in periods %}
+              <option value="{{ p }}" {% if p == period_filter %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>Classroom:
+          <select name="classroom">
+            <option value="">Any</option>
+            {% for c in classrooms %}
+              <option value="{{ c }}" {% if c == classroom_filter %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label># Issues:
+          <select name="issues_op">
+            <option value=">">></option>
+            <option value="<"><</option>
+            <option value="=">=</option>
+          </select>
+          <input type="number" name="issues_val" value="{{ issues_val }}" min="0">
+        </label>
+
+        <label># Students:
+          <select name="students_op">
+            <option value=">">></option>
+            <option value="<"><</option>
+            <option value="=">=</option>
+          </select>
+          <input type="number" name="students_val" value="{{ students_val }}" min="0">
+        </label>
+
+        <button type="submit" class="button-link">Apply Filters</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Course ID</th>
+            <th>Course Name</th>
+            <th>Period</th>
+            <th>Teacher</th>
+            <th>Classroom</th>
+            <th># of Issues</th>
+            <th># of Students</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in courses %}
+            <tr>
+              <td>
+                <span class="toggle-btn" onclick="toggleStudents('students-{{ c.course_id }}')">▼</span>
+              </td>
+              <td>{{ c.course_id }}</td>
+              <td>{{ c.course_name }}</td>
+              <td>{{ c.period }}</td>
+              <td>{{ c.teacher }}</td>
+              <td>{{ c.classroom }}</td>
+              <td>{{ c.num_issues }}</td>
+              <td>{{ c.num_students }}</td>
+            </tr>
+            <tr id="students-{{ c.course_id }}" class="student-list">
+              <td colspan="8">
+                <strong>Students:</strong>
+                {% if course_students[c.course_id] %}
+                  <ul style="margin-top:0.3rem;">
+                    {% for s in course_students[c.course_id] %}
+                      <li>{{ s.name }} (ID: {{ s.student_id }})</li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <em>No students enrolled.</em>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function toggleStudents(id) {
+    const row = document.getElementById(id);
+    if (row.style.display === 'table-row') {
+      row.style.display = 'none';
+    } else {
+      row.style.display = 'table-row';
+    }
+  }
+</script>
+
+</body>
+</html>

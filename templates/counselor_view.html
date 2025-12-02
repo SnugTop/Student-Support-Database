@@ -167,7 +167,7 @@
         <h2>Coursework Issues</h2>
         <table class="table">
             <thead>
-                <tr><th>ID</th><th>Student</th><th>Course</th><th>Notes</th><th>Created</th><th>Student Report</th><th>Student Report Date</th><th>Action</th></tr>
+                <tr><th>ID</th><th>Student</th><th>Course</th><th>Created</th><th>Student Report</th><th>Student Report Date</th><th>Action</th></tr>
             </thead>
             <tbody>
                 {% for c in coursework %}
@@ -175,10 +175,6 @@
                     <td>{{ c.coursework_id }}</td>
                     <td><a href="{{ url_for('view_student', student_id=c.student_id) }}">{{ c.student_name }}</a></td>
                     <td>{{ c.course_id }}</td>
-                    <td>
-                        <form method="POST" action="{{ url_for('update_coursework', coursework_id=c.coursework_id) }}">
-                            <input type="text" name="notes" value="{{ c.student_report or '' }}">
-                    </td>
                     <td>{{ c.created_at }}</td>
                     <td><input type="text" name="student_report" value="{{ c.student_report or '' }}"></td>
                     <td><input type="text" name="student_reported_at" value="{{ c.student_reported_at or '' }}" placeholder="YYYY-MM-DD"></td>
