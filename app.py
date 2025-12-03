@@ -461,6 +461,22 @@ def list_counselors():
         avg_salary=avg_salary
     )
 
+@app.route("/counselor/<int:counselor_id>/delete", methods=["POST"])
+def delete_counselor(counselor_id):
+    conn = get_db_connection()
+
+    # Delete salary row first (if exists) to maintain FK integrity
+    conn.execute("DELETE FROM Counselor_Salary WHERE counselor_id = ?", (counselor_id,))
+    
+    # Delete the counselor
+    conn.execute("DELETE FROM Counselor WHERE counselor_id = ?", (counselor_id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("list_counselors"))
+
+
 # ---------- COUNSELOR VIEW ----------
 
 @app.route("/counselor/<int:counselor_id>", methods=["GET"])

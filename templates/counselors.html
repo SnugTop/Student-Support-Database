@@ -70,8 +70,6 @@
               <th>Type</th>
               <th>Education</th>
               <th>Experience (years)</th>
-
-              <!-- Clickable salary sort -->
               <th>
                 <a href="{{ url_for('list_counselors',
                                      type=type_filter,
@@ -88,6 +86,7 @@
                   {% endif %}
                 </a>
               </th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -100,6 +99,11 @@
                 <td>{{ c.education }}</td>
                 <td>{{ c.experience }}</td>
                 <td>{% if c.salary %}${{ c.salary }}{% else %}—{% endif %}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('delete_counselor', counselor_id=c.counselor_id) }}" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this counselor?');" class="button-link danger">Delete</button>
+                  </form>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
