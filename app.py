@@ -461,6 +461,22 @@ def list_counselors():
         avg_salary=avg_salary
     )
 
+@app.route("/counselor/<int:counselor_id>/delete", methods=["POST"])
+def delete_counselor(counselor_id):
+    conn = get_db_connection()
+
+    # Delete salary row first (if exists) to maintain FK integrity
+    conn.execute("DELETE FROM Counselor_Salary WHERE counselor_id = ?", (counselor_id,))
+    
+    # Delete the counselor
+    conn.execute("DELETE FROM Counselor WHERE counselor_id = ?", (counselor_id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("list_counselors"))
+
+
 # ---------- COUNSELOR VIEW ----------
 
 @app.route("/counselor/<int:counselor_id>", methods=["GET"])
@@ -596,6 +612,42 @@ def counselor_view(counselor_id):
         financial=financial,
         coursework=coursework
     )
+
+@app.route("/counselor/<int:counselor_id>/edit", methods=["POST"])
+def edit_counselor_info(counselor_id):
+    conn = get_db_connection()
+
+    name = request.form["name"]
+    paid_volunteer = request.form["paid_volunteer"]  # lowercase now
+    education = request.form.get("education", "")
+    experience = request.form.get("experience", "")
+
+    # Update Counselor table
+    conn.execute("""
+        UPDATE Counselor
+        SET name = ?, paid_volunteer = ?, education = ?, experience = ?
+        WHERE counselor_id = ?
+    """, (name, paid_volunteer, education, experience, counselor_id))
+
+    # Salary only if Paid
+    if paid_volunteer == "paid":
+        salary = request.form.get("salary")
+        if salary is not None and salary != "":
+            conn.execute("""
+                INSERT INTO Counselor_Salary (counselor_id, salary)
+                VALUES (?, ?)
+                ON CONFLICT(counselor_id) DO UPDATE SET salary=excluded.salary
+            """, (counselor_id, salary))
+    else:
+        # If switching to volunteer, remove salary
+        conn.execute("DELETE FROM Counselor_Salary WHERE counselor_id = ?", (counselor_id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("counselor_view", counselor_id=counselor_id))
+
+
 
 @app.route("/counselors/new", methods=["GET", "POST"])
 def add_counselor():

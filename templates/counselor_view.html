@@ -18,20 +18,61 @@
 
     <p><a href="{{ url_for('list_counselors') }}" class="button-link secondary">← Back</a></p>
 
-    <!-- Counselor Basic Info -->
+    <!-- Editable Counselor Basic Info -->
     <div class="card">
         <h2>Basic Info</h2>
-        <p><strong>Type:</strong> {{ counselor.paid_volunteer }}</p>
-        <p><strong>Education:</strong> {{ counselor.education }}</p>
-        <p><strong>Experience:</strong> {{ counselor.experience }}</p>
-        <p><strong>Salary:</strong>
-            {% if counselor.paid_volunteer|lower == 'paid' and counselor.salary %}
-                ${{ counselor.salary }}
-            {% else %}
-                {% if counselor.paid_volunteer|lower == 'paid' %}Not set{% else %}Volunteer{% endif %}
-            {% endif %}
-        </p>
+        <form method="POST" action="{{ url_for('edit_counselor_info', counselor_id=counselor.counselor_id) }}">
+            <div class="form-row">
+                <label>Name:</label>
+                <input type="text" name="name" value="{{ counselor.name }}" required>
+            </div>
+
+            <div class="form-row">
+                <label>Type:</label>
+                <select name="paid_volunteer" id="pv_select" onchange="toggleSalary()">
+                    <option value="paid" {% if counselor.paid_volunteer == 'paid' %}selected{% endif %}>Paid</option>
+                    <option value="volunteer" {% if counselor.paid_volunteer == 'volunteer' %}selected{% endif %}>Volunteer</option>
+                </select>
+            </div>
+
+            <div class="form-row" id="salary_row">
+                <label>Salary:</label>
+                <input type="number" name="salary" id="salary" value="{{ counselor.salary or '' }}">
+            </div>
+
+            <div class="form-row">
+                <label>Education:</label>
+                <input type="text" name="education" value="{{ counselor.education or '' }}">
+            </div>
+
+            <div class="form-row">
+                <label>Experience:</label>
+                <textarea name="experience">{{ counselor.experience or '' }}</textarea>
+            </div>
+
+            <button type="submit" class="button-link">Save</button>
+        </form>
     </div>
+
+    <script>
+        function toggleSalary() {
+            const pv = document.getElementById('pv_select').value;
+            const salaryRow = document.getElementById('salary_row');
+            const salaryInput = document.getElementById('salary');
+
+            if (pv === 'paid') {
+                salaryRow.style.display = 'block';
+                salaryInput.disabled = false;
+            } else {
+                salaryRow.style.display = 'none';
+                salaryInput.disabled = true;
+            }
+        }
+
+        // Run on page load to set initial state
+        window.onload = toggleSalary;
+    </script>
+    <!-- End Editable Basic Info -->
 
     <!-- Students Seen -->
     <div class="card">
