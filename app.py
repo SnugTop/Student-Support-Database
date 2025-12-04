@@ -987,6 +987,22 @@ def new_visit():
                 (next_visit_id, cid)
             )
 
+        # Auto-create incomplete Followup ---------
+        if selected_counselor_ids:
+            next_followup_id = cursor.execute(
+                "SELECT COALESCE(MAX(followup_id),0)+1 FROM Followup"
+            ).fetchone()[0]
+
+            for cid in sorted(selected_counselor_ids):
+                cursor.execute(
+                    """
+                    INSERT INTO Followup (followup_id, visit_id, counselor_id, date, notes, complete)
+                    VALUES (?, ?, ?, NULL, NULL, NULL)
+                    """,
+                    (next_followup_id, next_visit_id, cid),
+                )
+                next_followup_id += 1
+
         # Process issues
         for i in range(issueCount):
             desc = request.form.get(f"issues[{i}][description]", "").strip()
