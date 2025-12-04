@@ -943,16 +943,18 @@ def new_visit():
     categories = cursor.execute("SELECT category_id, name FROM Category ORDER BY name").fetchall()
     courses = cursor.execute("SELECT course_id, course_name FROM Course ORDER BY course_id").fetchall()
 
-    HEAD_COUNSELOR_ID = 113  # hardcoded
+    HEAD_COUNSELOR_ID = 113
 
     if request.method == "POST":
         app.logger.info("Form data: %s", request.form.to_dict(flat=False))
 
         student_id = request.form.get("student_id", "").strip()
-        date = request.form.get("date", "").strip()
+        date = request.form.get("date", "").strip()       # used also as created_at
         mode = request.form.get("mode", "").strip()
 
-        # Collect counselor IDs from form
+        # ----------------------------
+        # Collect counselor IDs
+        # ----------------------------
         form_values = request.form.getlist("counselor_ids") + request.form.getlist("counselor_ids[]")
         selected_counselor_ids = set()
         for v in form_values:
@@ -961,33 +963,39 @@ def new_visit():
             except ValueError:
                 continue
 
-        # Check if any issue is critical
+        # ----------------------------
+        # Detect critical issues
+        # ----------------------------
         issueCount = int(request.form.get("issueCount", 0))
-        critical_issue_added = False
-        for i in range(issueCount):
-            if request.form.get(f"issues[{i}][critical]") == "1":
-                critical_issue_added = True
-                break
-
+        critical_issue_added = any(
+            request.form.get(f"issues[{i}][critical]") == "1"
+            for i in range(issueCount)
+        )
         if critical_issue_added:
             selected_counselor_ids.add(HEAD_COUNSELOR_ID)
             app.logger.info("Critical issue detected, added counselor 113")
 
+        # ----------------------------
         # Insert Visit
+        # ----------------------------
         next_visit_id = cursor.execute("SELECT COALESCE(MAX(visit_id),0)+1 FROM Visit").fetchone()[0]
         cursor.execute(
             "INSERT INTO Visit (visit_id, student_id, date, mode) VALUES (?, ?, ?, ?)",
             (next_visit_id, student_id, date, mode)
         )
 
+        # ----------------------------
         # Insert Visit_Counselor
+        # ----------------------------
         for cid in sorted(selected_counselor_ids):
             cursor.execute(
                 "INSERT OR IGNORE INTO Visit_Counselor (visit_id, counselor_id) VALUES (?, ?)",
                 (next_visit_id, cid)
             )
 
-        # Auto-create incomplete Followup
+        # ----------------------------
+        # Auto-create Followup entries
+        # ----------------------------
         if selected_counselor_ids:
             next_followup_id = cursor.execute(
                 "SELECT COALESCE(MAX(followup_id),0)+1 FROM Followup"
@@ -1003,17 +1011,28 @@ def new_visit():
                 )
                 next_followup_id += 1
 
-        # Process issues
+        # ----------------------------
+        # INSERT ISSUES + Issue_Category + Referral + Coursework + Financial
+        # ----------------------------
         for i in range(issueCount):
+
             desc = request.form.get(f"issues[{i}][description]", "").strip()
             if not desc:
                 continue
+
             critical = request.form.get(f"issues[{i}][critical]") == "1"
-            next_issue_id = cursor.execute("SELECT COALESCE(MAX(issue_id),0)+1 FROM Issue").fetchone()[0]
+
+            # --- Create Issue ---
+            next_issue_id = cursor.execute(
+                "SELECT COALESCE(MAX(issue_id),0)+1 FROM Issue"
+            ).fetchone()[0]
+
             cursor.execute(
                 "INSERT INTO Issue (issue_id, visit_id, issue_description, severity) VALUES (?, ?, ?, ?)",
                 (next_issue_id, next_visit_id, desc, int(critical))
             )
+
+            # --- Categories ---
             for cat_id in request.form.getlist(f"issues[{i}][categories][]"):
                 if cat_id.strip():
                     try:
@@ -1023,19 +1042,84 @@ def new_visit():
                         )
                     except Exception:
                         pass
-            # Referral/Coursework/Financial types
-            if f"issues[{i}][referral]" in request.form:
-                cursor.execute("INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Referral')", (next_issue_id,))
-                details = request.form.get(f"issues[{i}][referral_details]", "")
-                next_ref_id = cursor.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
-                cursor.execute("INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
-                               (next_ref_id, next_issue_id, details))
-            if f"issues[{i}][coursework]" in request.form:
-                cursor.execute("INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Coursework')", (next_issue_id,))
-            if f"issues[{i}][financial]" in request.form:
-                cursor.execute("INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Financial')", (next_issue_id,))
 
-        # Suggestions
+            # ============================================================
+            # REFERRAL
+            # ============================================================
+            if f"issues[{i}][referral]" in request.form:
+                cursor.execute(
+                    "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Referral')",
+                    (next_issue_id,)
+                )
+
+                referral_details = request.form.get(f"issues[{i}][referral_details]", "")
+
+                next_ref_id = cursor.execute(
+                    "SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral"
+                ).fetchone()[0]
+
+                cursor.execute(
+                    """
+                    INSERT INTO Referral
+                        (referral_id, issue_id, details, student_report, created_at, student_reported_at)
+                    VALUES (?, ?, ?, NULL, ?, NULL)
+                    """,
+                    (next_ref_id, next_issue_id, referral_details, date)
+                )
+
+            # ============================================================
+            # COURSEWORK
+            # ============================================================
+            if f"issues[{i}][coursework]" in request.form:
+
+                cursor.execute(
+                    "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Coursework')",
+                    (next_issue_id,)
+                )
+
+                course_id = request.form.get(f"issues[{i}][course_id]", "").strip() or None
+
+                next_coursework_id = cursor.execute(
+                    "SELECT COALESCE(MAX(coursework_id),0)+1 FROM Coursework"
+                ).fetchone()[0]
+
+                cursor.execute(
+                    """
+                    INSERT INTO Coursework
+                        (coursework_id, course_id, issue_id, dean_notes, student_report,
+                         created_at, student_reported_at)
+                    VALUES (?, ?, ?, NULL, NULL, ?, NULL)
+                    """,
+                    (next_coursework_id, course_id, next_issue_id, date)
+                )
+
+            # ============================================================
+            # FINANCIAL
+            # ============================================================
+            if f"issues[{i}][financial]" in request.form:
+
+                cursor.execute(
+                    "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Financial')",
+                    (next_issue_id,)
+                )
+
+                next_fin_id = cursor.execute(
+                    "SELECT COALESCE(MAX(financial_id),0)+1 FROM Financial"
+                ).fetchone()[0]
+
+                cursor.execute(
+                    """
+                    INSERT INTO Financial
+                        (financial_id, issue_id, student_report, job_notes,
+                         created_at, student_reported_at)
+                    VALUES (?, ?, NULL, NULL, ?, NULL)
+                    """,
+                    (next_fin_id, next_issue_id, date)
+                )
+
+        # ----------------------------
+        # SUGGESTIONS
+        # ----------------------------
         suggestionCount = int(request.form.get("suggestionCount", 0))
         for i in range(suggestionCount):
             raw_cid = request.form.get(f"suggestions[{i}][counselor_id]")
@@ -1046,14 +1130,17 @@ def new_visit():
                 c_id = int(raw_cid)
             except ValueError:
                 continue
-            next_sugg_id = cursor.execute("SELECT COALESCE(MAX(suggestion_id),0)+1 FROM Suggestion").fetchone()[0]
+
+            next_sugg_id = cursor.execute(
+                "SELECT COALESCE(MAX(suggestion_id),0)+1 FROM Suggestion"
+            ).fetchone()[0]
+
             cursor.execute(
                 "INSERT INTO Suggestion (suggestion_id, visit_id, counselor_id, details) VALUES (?, ?, ?, ?)",
                 (next_sugg_id, next_visit_id, c_id, details)
             )
 
         conn.commit()
-        app.logger.info("Visit %s saved with counselors %s", next_visit_id, sorted(selected_counselor_ids))
         conn.close()
         return redirect(url_for("list_visits"))
 
@@ -1065,6 +1152,7 @@ def new_visit():
         categories=categories,
         courses=courses
     )
+
 
 
 
@@ -1288,43 +1376,43 @@ def edit_issue(issue_id):
         conn.close()
         return "Issue not found", 404
 
-    # All categories
+    # Pull the visit date so that created_at = visit.created_at ALWAYS
+    visit_date = conn.execute(
+        "SELECT date FROM Visit WHERE visit_id = ?",
+        (issue["visit_id"],)
+    ).fetchone()["date"]
+
+    # Load categories
     categories = conn.execute("SELECT category_id, name FROM Category").fetchall()
     selected_categories = [row["category_id"] for row in conn.execute(
         "SELECT category_id FROM Issue_Category WHERE issue_id = ?", (issue_id,)
     ).fetchall()]
 
-    # Which types exist
+    # Load types
     types = [row["issue_type"] for row in conn.execute(
         "SELECT issue_type FROM Issue_Type WHERE issue_id = ?", (issue_id,)
     )]
 
-    # Referral data
+    # Load referral
     referral_details = None
     if "Referral" in types:
         r = conn.execute("SELECT details FROM Referral WHERE issue_id = ?", (issue_id,)).fetchone()
         referral_details = r["details"] if r else ""
 
-    # Coursework data
+    # Load coursework
     coursework_course_id = None
-    coursework_dean_notes = None
     if "Coursework" in types:
-        cw = conn.execute("SELECT course_id, dean_notes FROM Coursework WHERE issue_id = ?", (issue_id,)).fetchone()
+        cw = conn.execute("SELECT course_id FROM Coursework WHERE issue_id = ?", (issue_id,)).fetchone()
         if cw:
             coursework_course_id = cw["course_id"]
-            coursework_dean_notes = cw["dean_notes"]
 
-    # Financial data
-    financial_job_notes = None
-    if "Financial" in types:
-        fin = conn.execute("SELECT job_notes FROM Financial WHERE issue_id = ?", (issue_id,)).fetchone()
-        if fin:
-            financial_job_notes = fin["job_notes"]
+    # Load financial
+    financial_exists = ("Financial" in types)
 
-    # Get all courses for dropdown
+    # Load courses
     all_courses = conn.execute("SELECT course_id, course_name FROM Course").fetchall()
 
-    # -------- POST ----------
+    # ============= POST =============
     if request.method == "POST":
         description = request.form["description"]
         critical = int(request.form["critical"])
@@ -1336,10 +1424,8 @@ def edit_issue(issue_id):
 
         referral_text = request.form.get("referral_details")
         course_id = request.form.get("course_id") or None
-        dean_notes = request.form.get("dean_notes")
-        job_notes = request.form.get("job_notes")
 
-        # Update issue
+        # Update issue base table
         conn.execute(
             "UPDATE Issue SET issue_description=?, severity=? WHERE issue_id=?",
             (description, critical, issue_id)
@@ -1356,7 +1442,7 @@ def edit_issue(issue_id):
         # Clear all types
         conn.execute("DELETE FROM Issue_Type WHERE issue_id=?", (issue_id,))
 
-        # ---- REFERRAL ----
+        # ---- Referral ----
         if referral_flag:
             conn.execute(
                 "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Referral')",
@@ -1365,17 +1451,21 @@ def edit_issue(issue_id):
 
             exists = conn.execute("SELECT 1 FROM Referral WHERE issue_id=?", (issue_id,)).fetchone()
             if exists:
-                conn.execute("UPDATE Referral SET details=? WHERE issue_id=?", (referral_text, issue_id))
-            else:
-                next_id = conn.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
                 conn.execute(
-                    "INSERT INTO Referral (referral_id, issue_id, details) VALUES (?, ?, ?)",
-                    (next_id, issue_id, referral_text)
+                    "UPDATE Referral SET details=? WHERE issue_id=?",
+                    (referral_text, issue_id)
+                )
+            else:
+                new_id = conn.execute("SELECT COALESCE(MAX(referral_id),0)+1 FROM Referral").fetchone()[0]
+                conn.execute(
+                    "INSERT INTO Referral (referral_id, issue_id, details, created_at) "
+                    "VALUES (?, ?, ?, ?)",
+                    (new_id, issue_id, referral_text, visit_date)
                 )
         else:
             conn.execute("DELETE FROM Referral WHERE issue_id=?", (issue_id,))
 
-        # ---- COURSEWORK ----
+        # ---- Coursework ----
         if coursework_flag:
             conn.execute(
                 "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Coursework')",
@@ -1385,19 +1475,20 @@ def edit_issue(issue_id):
             exists = conn.execute("SELECT 1 FROM Coursework WHERE issue_id=?", (issue_id,)).fetchone()
             if exists:
                 conn.execute(
-                    "UPDATE Coursework SET course_id=?, dean_notes=? WHERE issue_id=?",
-                    (course_id, dean_notes, issue_id)
+                    "UPDATE Coursework SET course_id=? WHERE issue_id=?",
+                    (course_id, issue_id)
                 )
             else:
-                next_id = conn.execute("SELECT COALESCE(MAX(coursework_id),0)+1 FROM Coursework").fetchone()[0]
+                new_id = conn.execute("SELECT COALESCE(MAX(coursework_id),0)+1 FROM Coursework").fetchone()[0]
                 conn.execute(
-                    "INSERT INTO Coursework (coursework_id, issue_id, course_id, dean_notes, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
-                    (next_id, issue_id, course_id, dean_notes)
+                    "INSERT INTO Coursework (coursework_id, issue_id, course_id, created_at) "
+                    "VALUES (?, ?, ?, ?)",
+                    (new_id, issue_id, course_id, visit_date)
                 )
         else:
             conn.execute("DELETE FROM Coursework WHERE issue_id=?", (issue_id,))
 
-        # ---- FINANCIAL ----
+        # ---- Financial ----
         if financial_flag:
             conn.execute(
                 "INSERT INTO Issue_Type (issue_id, issue_type) VALUES (?, 'Financial')",
@@ -1405,17 +1496,14 @@ def edit_issue(issue_id):
             )
 
             exists = conn.execute("SELECT 1 FROM Financial WHERE issue_id=?", (issue_id,)).fetchone()
-            if exists:
+            if not exists:
+                new_id = conn.execute("SELECT COALESCE(MAX(financial_id),0)+1 FROM Financial").fetchone()[0]
                 conn.execute(
-                    "UPDATE Financial SET job_notes=? WHERE issue_id=?",
-                    (job_notes, issue_id)
+                    "INSERT INTO Financial (financial_id, issue_id, created_at) "
+                    "VALUES (?, ?, ?)",
+                    (new_id, issue_id, visit_date)
                 )
-            else:
-                next_id = conn.execute("SELECT COALESCE(MAX(financial_id),0)+1 FROM Financial").fetchone()[0]
-                conn.execute(
-                    "INSERT INTO Financial (financial_id, issue_id, job_notes, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
-                    (next_id, issue_id, job_notes)
-                )
+            # If exists, do nothing — job_notes no longer editable
         else:
             conn.execute("DELETE FROM Financial WHERE issue_id=?", (issue_id,))
 
@@ -1434,10 +1522,9 @@ def edit_issue(issue_id):
         financial_flag=("Financial" in types),
         referral_details=referral_details,
         coursework_course_id=coursework_course_id,
-        coursework_dean_notes=coursework_dean_notes,
-        financial_job_notes=financial_job_notes,
         all_courses=all_courses
     )
+
 
 
 
