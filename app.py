@@ -987,7 +987,7 @@ def new_visit():
                 (next_visit_id, cid)
             )
 
-        # Auto-create incomplete Followup ---------
+        # Auto-create incomplete Followup
         if selected_counselor_ids:
             next_followup_id = cursor.execute(
                 "SELECT COALESCE(MAX(followup_id),0)+1 FROM Followup"
